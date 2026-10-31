@@ -1,0 +1,34 @@
+<div class="container">
+  <header>
+    <a class="logo" routerLink="/">SABOTZ.</a>
+    <a class="back" routerLink="/">&#8592; BACK TO HOME</a>
+    <app-side-nav />
+  </header>
+  <main>
+    <h1>SHOES.</h1>
+    <p class="subtitle">EXPLORE OUR SNEAKER COLLECTION</p>
+    <div class="filters">
+      <button class="filter" [class.active]="selectedBrand === 'all'" (click)="selectedBrand = 'all'">ALL</button>
+      <button class="filter" [class.active]="selectedBrand === 'nike'" (click)="selectedBrand = 'nike'">NIKE</button>
+      <button class="filter" [class.active]="selectedBrand === 'adidas'" (click)="selectedBrand = 'adidas'">ADIDAS</button>
+      <button class="filter" [class.active]="selectedBrand === 'new balance'" (click)="selectedBrand = 'new balance'">NEW BALANCE</button>
+      <button class="filter" [class.active]="selectedBrand === 'asics'" (click)="selectedBrand = 'asics'">ASICS</button>
+    </div>
+    <div class="search-box"><input type="search" [(ngModel)]="search" placeholder="Search sneakers by name..." aria-label="Search sneakers" autocomplete="off"></div>
+    <div class="products">
+      <article class="product" *ngFor="let product of visibleProducts">
+        <img [src]="'/' + product.fotos[0]" [alt]="product.nome" loading="lazy">
+        <div class="details">
+          <div class="brand">{{ product.marca.toUpperCase() }}</div>
+          <div class="name">{{ product.nome }}</div>
+          <div class="price" *ngIf="product.preco !== undefined">{{ formatPrice(product.preco) }}</div>
+          <div class="status">{{ product.status }}</div>
+          <a class="view" [routerLink]="['/products', productSlug(product)]">VIEW GALLERY &#8599;</a>
+        </div>
+      </article>
+    </div>
+    <p class="empty" *ngIf="error">{{ error }}</p>
+    <p class="empty" *ngIf="!error && products.length && !visibleProducts.length">No products available in this category yet.</p>
+  </main>
+  <footer>SABOTZ CLOTHING &amp; SUPPLY</footer>
+</div>

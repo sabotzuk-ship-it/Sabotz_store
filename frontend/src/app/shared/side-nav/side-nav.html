@@ -1,0 +1,10 @@
+<button class="menu-button" type="button" [attr.aria-label]="open ? 'Close menu' : 'Open menu'" [attr.aria-expanded]="open" aria-controls="site-menu" (click)="open = !open"><span [hidden]="open">&#9776;</span><span [hidden]="!open">&#215;</span></button>
+<button class="menu-backdrop" [class.open]="open" type="button" aria-label="Close menu" (click)="open = false"></button>
+<nav id="site-menu" class="menu" [class.open]="open" aria-label="Main navigation">
+  <a routerLink="/" (click)="open = false">HOME</a>
+  <a routerLink="/shoes" (click)="open = false">SHOES</a>
+  <a href="clothing.html" (click)="open = false">CLOTHING</a>
+  <a href="accessories.html" (click)="open = false">ACCESSORIES</a>
+  <a href="https://www.instagram.com/sabotz.clothing/" target="_blank" rel="noopener noreferrer" (click)="open = false">INSTAGRAM</a>
+  <a class="admin-link" routerLink="/admin" (click)="open = false">ADMIN LOGIN</a>
+</nav>

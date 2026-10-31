@@ -1,0 +1,31 @@
+<div class="container" *ngIf="product as item; else unavailable">
+  <header>
+    <a class="logo" routerLink="/">SABOTZ.</a>
+    <a class="back" routerLink="/shoes">&#8592; BACK TO SHOES</a>
+    <app-side-nav />
+  </header>
+  <main class="product-layout">
+    <section aria-label="Product photo gallery">
+      <img class="main-photo" [src]="'/' + selectedPhoto" [alt]="item.nome + ' - gallery photo'">
+      <div class="thumbnails">
+        <button type="button" *ngFor="let photo of item.fotos; let i = index" [class.active]="selectedIndex === i" [attr.aria-label]="'View product photo ' + (i + 1)" (click)="selectedIndex = i">
+          <img [src]="'/' + photo" [alt]="'Product photo ' + (i + 1)" loading="lazy">
+        </button>
+      </div>
+    </section>
+    <section>
+      <div class="category">{{ presentation.collection }}</div>
+      <h1>{{ item.nome }}</h1>
+      <p class="price" *ngIf="item.preco !== undefined">{{ formatPrice(item.preco) }}</p>
+      <span class="status">{{ item.status }}</span>
+      <div class="contacts">
+        <a href="https://wa.me/447354186009" target="_blank" rel="noopener noreferrer">CONTACT SABOTZ ON WHATSAPP &#8599;</a>
+        <a href="https://www.instagram.com/sabotz.clothing/" target="_blank" rel="noopener noreferrer">CONTACT SABOTZ ON INSTAGRAM &#8599;</a>
+      </div>
+      <p class="description">{{ presentation.description }}</p>
+      <p class="note">Internal catalogue demonstration only.</p>
+    </section>
+  </main>
+  <footer>SABOTZ CLOTHING &amp; SUPPLY</footer>
+</div>
+<ng-template #unavailable><div class="container"><header><a class="logo" routerLink="/">SABOTZ.</a><a class="back" routerLink="/shoes">&#8592; BACK TO SHOES</a></header><p class="note">{{ error || 'Loading product...' }}</p></div></ng-template>
