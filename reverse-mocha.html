@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reverse Mocha Gallery | SABOTZ</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #0b0b0b;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 1150px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 45px;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 900;
+      color: white;
+      text-decoration: none;
+    }
+
+    .back {
+      color: #aaa;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-decoration: none;
+    }
+
+    .product-layout {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 50px;
+    }
+
+    .main-photo {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      display: block;
+      background: #181818;
+    }
+
+    .thumbnails {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .thumbnails button {
+      padding: 0;
+      border: 2px solid transparent;
+      background: none;
+      cursor: pointer;
+    }
+
+    .thumbnails button.active {
+      border-color: white;
+    }
+
+    .thumbnails img {
+      width: 100%;
+      display: block;
+    }
+
+    .category {
+      color: #999;
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+
+    h1 {
+      font-size: clamp(30px, 5vw, 48px);
+      line-height: 1.1;
+      margin: 20px 0;
+    }
+
+    .status {
+      display: inline-block;
+      border: 1px solid #777;
+      padding: 10px 14px;
+      font-size: 11px;
+      letter-spacing: 1px;
+    }
+
+    .description {
+      color: #aaa;
+      line-height: 1.7;
+      margin: 30px 0;
+      font-size: 14px;
+    }
+
+    .note {
+      color: #888;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 18px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 80px 0 20px;
+      color: #777;
+      font-size: 10px;
+      letter-spacing: 2px;
+    }
+
+    @media (max-width: 750px) {
+      .product-layout {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+
+      .container {
+        padding: 20px 15px;
+      }
+
+      header {
+        margin-bottom: 25px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header>
+      <a class="logo" href="index.html">SABOTZ.</a>
+      <a class="back" href="shoes.html">
+        ← BACK TO SHOES
+      </a>
+    </header>
+
+    <main class="product-layout">
+
+      <section aria-label="Photo gallery">
+        <img
+          id="mainPhoto"
+          class="main-photo"
+          src="images/jordan-reverse-mocha/reverse-mocha-1.png"
+          alt="Reverse Mocha gallery photo"
+        >
+
+        <div class="thumbnails" id="thumbnails"></div>
+      </section>
+
+      <section>
+        <div class="category">JORDAN COLLECTION</div>
+
+        <h1>Jordan 1 Low Reverse Mocha</h1>
+
+        <span class="status">GALLERY PREVIEW</span>
+
+        <p class="description">
+          Low-top sneaker design featuring brown,
+          white and cream tones.
+          Select a photo to explore different angles.
+        </p>
+
+        <p class="note">
+          Internal catalogue demonstration only.
+        </p>
+      </section>
+
+    </main>
+
+    <footer>SABOTZ CLOTHING & SUPPLY</footer>
+  </div>
+
+  <script>
+    const photoFolder = "images/jordan-reverse-mocha/";
+    const thumbnails = document.getElementById("thumbnails");
+    const mainPhoto = document.getElementById("mainPhoto");
+
+    for (let i = 1; i <= 3; i++) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("aria-label", `View photo ${i}`);
+
+      const image = document.createElement("img");
+      image.src = `${photoFolder}reverse-mocha-${i}.png`;
+      image.alt = `Reverse Mocha photo ${i}`;
+      image.loading = "lazy";
+
+      if (i === 1) button.classList.add("active");
+
+      button.appendChild(image);
+
+      button.addEventListener("click", () => {
+        mainPhoto.src = image.src;
+        mainPhoto.alt = image.alt;
+
+        document.querySelectorAll(".thumbnails button")
+          .forEach(b => b.classList.remove("active"));
+
+        button.classList.add("active");
+      });
+
+      thumbnails.appendChild(button);
+    }
+  </script>
+</body>
+</html>
+ 

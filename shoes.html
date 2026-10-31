@@ -1,0 +1,342 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shoes | SABOTZ Clothing & Supply</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #0b0b0b;
+  color: white;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 32px 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 65px;
+}
+
+.logo {
+  color: white;
+  font-size: 28px;
+  font-weight: 900;
+  text-decoration: none;
+  letter-spacing: -1px;
+}
+
+.back {
+  color: #aaa;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-decoration: none;
+}
+
+h1 {
+  font-size: clamp(40px, 8vw, 76px);
+  letter-spacing: -3px;
+  margin: 0 0 10px;
+}
+
+.subtitle {
+  color: #999;
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin-bottom: 40px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.filter {
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #444;
+  padding: 12px 19px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.filter.active,
+.filter:hover {
+  background: white;
+  color: black;
+  border-color: white;
+}
+
+.products {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+.product {
+  background: #161616;
+  overflow: hidden;
+}
+
+.product img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+.details { padding: 18px; }
+
+.brand {
+  color: #999;
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+.status {
+  display: inline-block;
+  border: 1px solid #666;
+  padding: 7px 10px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+}
+
+.view {
+  display: block;
+  text-align: center;
+  background: white;
+  color: black;
+  padding: 14px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.empty {
+  display: none;
+  color: #999;
+  padding: 30px 0;
+}
+
+footer {
+  text-align: center;
+  padding: 70px 0 20px;
+  color: #777;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+@media (max-width: 750px) {
+  .products { grid-template-columns: repeat(2, 1fr); }
+  header { margin-bottom: 45px; }
+}
+
+@media (max-width: 450px) {
+  .products { grid-template-columns: 1fr; }
+  .container { padding: 25px 15px; }
+}
+
+/* SABOTZ — Search Bar */
+.search-box {
+  width: 100%;
+  margin: 0 0 35px;
+}
+
+.search-box input {
+  display: block;
+  width: 100%;
+  height: 56px;
+  padding: 0 20px;
+  background: #171717;
+  color: #ffffff;
+  border: 1px solid #383838;
+  border-radius: 4px;
+  outline: none;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.search-box input::placeholder {
+  color: #888888;
+}
+
+.search-box input:focus {
+  border-color: #ffffff;
+}
+
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+  <a class="logo" href="index.html">SABOTZ.</a>
+  <a class="back" href="index.html">← BACK TO HOME</a>
+</header>
+
+<main>
+  <h1>SHOES.</h1>
+  <p class="subtitle">EXPLORE OUR SNEAKER COLLECTION</p>
+
+  <div class="filters">
+    <button class="filter active" data-brand="all">ALL</button>
+    <button class="filter" data-brand="nike">NIKE</button>
+    <button class="filter" data-brand="adidas">ADIDAS</button>
+    <button class="filter" data-brand="new balance">NEW BALANCE</button>
+    <button class="filter" data-brand="asics">ASICS</button>
+  </div>
+
+<div class="search-box">
+  <input
+    type="search"
+    id="searchInput"
+    placeholder="Search sneakers by name..."
+    aria-label="Search sneakers"
+    autocomplete="off"
+  >
+</div>
+
+  <div class="products" id="products"></div>
+
+  <p class="empty" id="empty">
+    No products available in this category yet.
+  </p>
+</main>
+
+<footer>SABOTZ CLOTHING & SUPPLY</footer>
+</div>
+
+<script>
+  let products = [];
+
+async function loadProducts() {
+  try {
+    const response = await fetch("catalogo/produtos.json");
+
+    if (!response.ok) {
+      throw new Error("Could not load catalogue");
+    }
+
+    const data = await response.json();
+
+    products = data.produtos
+      .filter(product => product.categoria === "Shoes")
+      .map(product => ({
+        brand: product.marca,
+        name: product.nome,
+        status: product.status,
+        image: product.fotos[0],
+        link: product.pagina
+      }));
+
+    renderProducts();
+  } catch (error) {
+    console.error(error);
+    empty.textContent = "Could not load catalogue.";
+    empty.style.display = "block";
+  }
+}
+
+
+const grid = document.getElementById("products");
+const empty = document.getElementById("empty");
+const buttons = document.querySelectorAll(".filter");
+
+function renderProducts(brand = "all") {
+  
+const search = document.getElementById("searchInput")
+  .value.toLowerCase().trim();
+
+const filtered = products.filter(product => {
+  const matchesBrand =
+    brand === "all" || product.brand.toLowerCase() === brand;
+
+  const matchesSearch =
+    product.name.toLowerCase().includes(search) ||
+    product.brand.toLowerCase().includes(search);
+
+  return matchesBrand && matchesSearch;
+});
+
+
+  grid.innerHTML = "";
+
+  filtered.forEach(product => {
+    const card = document.createElement("article");
+    card.className = "product";
+
+    const image = document.createElement("img");
+    image.src = product.image;
+    image.alt = product.name;
+    image.loading = "lazy";
+
+    const details = document.createElement("div");
+    details.className = "details";
+
+    const brandLabel = document.createElement("div");
+    brandLabel.className = "brand";
+    brandLabel.textContent = product.brand.toUpperCase();
+
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = product.name;
+
+    const status = document.createElement("div");
+    status.className = "status";
+    status.textContent = product.status;
+
+    const link = document.createElement("a");
+    link.className = "view";
+    link.href = product.link;
+    link.textContent = "VIEW GALLERY ↗";
+
+    details.append(brandLabel, name, status, link);
+    card.append(image, details);
+    grid.appendChild(card);
+  });
+
+  empty.style.display = filtered.length ? "none" : "block";
+}
+
+buttons.forEach(button => {
+  button.addEventListener("click", () => {
+    buttons.forEach(b => b.classList.remove("active"));
+    button.classList.add("active");
+    renderProducts(button.dataset.brand);
+  });
+});
+document.getElementById("searchInput").addEventListener("input", () => {
+  const activeBrand = document.querySelector(".filter.active").dataset.brand;
+  renderProducts(activeBrand);
+});
+loadProducts();
+</script>
+
+</body>
+</html>

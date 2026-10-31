@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SABOTZ | Teste de Galeria</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      background: #0b0b0b;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 { margin-bottom: 8px; }
+
+    p { color: #aaa; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: #191919;
+      padding: 10px;
+    }
+
+    .card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: contain;
+      background: #111;
+    }
+
+    .card p {
+      font-size: 12px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>SABOTZ. PHOTO TEST</h1>
+  <p>Verificação das imagens encontradas no álbum.</p>
+
+  <div class="grid" id="gallery"></div>
+
+  <script>
+    const fotos = [
+      "618f4246",
+      "83ecb164",
+      "d9ccce99",
+      "f9ac933f",
+      "4aee56ce",
+      "8620efa0",
+      "5525d08e",
+      "3596e3f7",
+      "04f5ad78"
+    ];
+
+    const gallery = document.getElementById("gallery");
+
+    fotos.forEach((id, index) => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const img = document.createElement("img");
+      img.src =
+        "https://photo.yupoo.com/ovosneaker/" +
+        id + "/big.jpg";
+
+      img.alt = "Foto " + (index + 1);
+
+      const label = document.createElement("p");
+      label.textContent = "PHOTO " + (index + 1);
+
+      card.appendChild(img);
+      card.appendChild(label);
+      gallery.appendChild(card);
+    });
+  </script>
+
+</body>
+</html>
+

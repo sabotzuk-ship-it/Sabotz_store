@@ -1,0 +1,31 @@
+
+{
+  "produtos": [
+    {
+      "id": "jordan-olive-demo",
+      "nome": "Jordan 1 Low Travis Scott Olive",
+      "marca": "Nike",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "fotos": [
+        "images/jordan-olive/travis-olive-1.png",
+        "images/jordan-olive/travis-olive-2.png",
+        "images/jordan-olive/travis-olive-3.png"
+      ],
+      "pagina": "jordan-olive.html"
+    },
+    {
+      "id": "reverse-mocha-demo",
+      "nome": "Jordan 1 Low Reverse Mocha",
+      "marca": "Nike",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "fotos": [
+        "images/jordan-reverse-mocha/reverse-mocha-1.png",
+        "images/jordan-reverse-mocha/reverse-mocha-2.png",
+        "images/jordan-reverse-mocha/reverse-mocha-3.png"
+      ],
+      "pagina": "reverse-mocha.html"
+    }
+  ]
+}
