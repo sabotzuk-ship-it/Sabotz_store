@@ -160,7 +160,7 @@ footer {
   .container { padding: 25px 15px; }
 }
 
-/* SABOTZ — Search Bar */
+/* SABOTZ - Search Bar */
 .search-box {
   width: 100%;
   margin: 0 0 35px;
@@ -197,7 +197,7 @@ footer {
 
 <header>
   <a class="logo" href="index.html">SABOTZ.</a>
-  <a class="back" href="index.html">← BACK TO HOME</a>
+  <a class="back" href="index.html">&#8592; BACK TO HOME</a>
 </header>
 
 <main>
@@ -237,15 +237,17 @@ footer {
 
 async function loadProducts() {
   try {
-    const response = await fetch("catalogo/produtos.json");
+    const response = await fetch("data/products.json");
 
     if (!response.ok) {
       throw new Error("Could not load catalogue");
     }
 
     const data = await response.json();
+    const saved = localStorage.getItem("sabotz-products");
+    const catalogue = saved ? JSON.parse(saved) : data.produtos;
 
-    products = data.produtos
+    products = catalogue
       .filter(product => product.categoria === "Shoes")
       .map(product => ({
         brand: product.marca,
@@ -314,7 +316,7 @@ const filtered = products.filter(product => {
     const link = document.createElement("a");
     link.className = "view";
     link.href = product.link;
-    link.textContent = "VIEW GALLERY ↗";
+    link.textContent = "VIEW GALLERY &#8599;";
 
     details.append(brandLabel, name, status, link);
     card.append(image, details);

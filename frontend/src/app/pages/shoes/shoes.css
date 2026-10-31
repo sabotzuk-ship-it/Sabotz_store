@@ -1,0 +1,28 @@
+:host { display: block; min-height: 100vh; background: #0b0b0b; color: white; font-family: Arial, Helvetica, sans-serif; }
+* { box-sizing: border-box; }
+.container { max-width: 1100px; margin: auto; padding: 32px 20px; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 65px; }
+.logo { color: white; font-size: 28px; font-weight: 900; text-decoration: none; letter-spacing: -1px; }
+.back { color: #aaa; font-size: 12px; letter-spacing: 2px; text-decoration: none; }
+h1 { font-size: clamp(40px, 8vw, 76px); letter-spacing: -3px; margin: 0 0 10px; }
+.subtitle { color: #999; font-size: 13px; letter-spacing: 2px; margin-bottom: 40px; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 40px; }
+.filter { background: transparent; color: #aaa; border: 1px solid #444; padding: 12px 19px; cursor: pointer; font-size: 12px; font-weight: bold; letter-spacing: 1px; }
+.filter.active, .filter:hover { background: white; color: black; border-color: white; }
+.products { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.product { background: #161616; overflow: hidden; }
+.product img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.details { padding: 18px; }
+.brand { color: #999; font-size: 11px; letter-spacing: 2px; margin-bottom: 8px; }
+.name { font-size: 16px; font-weight: bold; margin-bottom: 12px; }
+.price { margin: 0 0 12px; font-size: 15px; font-weight: bold; }
+.status { display: inline-block; border: 1px solid #666; padding: 7px 10px; font-size: 10px; letter-spacing: 1px; margin-bottom: 18px; }
+.view { display: block; text-align: center; background: white; color: black; padding: 14px; text-decoration: none; font-weight: bold; font-size: 12px; letter-spacing: 2px; }
+.empty { color: #999; padding: 30px 0; }
+footer { text-align: center; padding: 70px 0 20px; color: #777; font-size: 10px; letter-spacing: 2px; }
+@media (max-width: 750px) { .products { grid-template-columns: repeat(2, 1fr); } header { margin-bottom: 45px; } }
+@media (max-width: 450px) { .products { grid-template-columns: 1fr; } .container { padding: 25px 15px; } }
+.search-box { width: 100%; margin: 0 0 35px; }
+.search-box input { display: block; width: 100%; height: 56px; padding: 0 20px; background: #171717; color: #fff; border: 1px solid #383838; border-radius: 4px; outline: none; font-family: Arial, Helvetica, sans-serif; font-size: 14px; transition: border-color 0.2s; }
+.search-box input::placeholder { color: #888; }
+.search-box input:focus { border-color: #fff; }

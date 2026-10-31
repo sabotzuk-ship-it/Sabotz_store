@@ -1,0 +1,73 @@
+<div class="wrap">
+  <header class="top">
+    <a class="logo" routerLink="/">SABOTZ.</a>
+    <a routerLink="/shoes">Ver loja &#8599;</a>
+  </header>
+
+  <section class="panel" *ngIf="!loggedIn">
+    <h1>Admin login</h1>
+    <p class="muted">Entre com as credenciais de administrador para gerenciar os produtos da loja.</p>
+    <form (ngSubmit)="login()">
+      <div class="grid">
+        <div><label for="email">Usuário</label><input id="email" name="username" [(ngModel)]="username" autocomplete="username" required></div>
+        <div><label for="password">Senha</label><input id="password" name="password" [(ngModel)]="password" type="password" autocomplete="current-password" required></div>
+      </div>
+      <div class="error">{{ loginError || loadError }}</div>
+      <button type="submit" [disabled]="busy">{{ busy ? 'Entrando...' : 'Entrar' }}</button>
+    </form>
+  </section>
+
+  <main *ngIf="loggedIn">
+    <div class="dashboard-heading"><div><h1>Produtos</h1><p class="muted">Gerencie os itens exibidos na loja.</p></div><button class="secondary" type="button" (click)="logout()">Sair</button></div>
+    <p class="error" *ngIf="loadError">{{ loadError }}</p>
+
+    <div class="editor-layout">
+      <section class="panel editor-panel">
+        <h2>{{ editingId ? 'Editar produto' : 'Adicionar produto' }}</h2>
+        <form (ngSubmit)="save()">
+          <div class="grid">
+            <div><label for="name">Nome</label><input id="name" name="name" [(ngModel)]="form.name" required></div>
+            <div><label for="brand">Marca</label><input id="brand" name="brand" [(ngModel)]="form.brand" required></div>
+            <div><label for="status">Status</label><input id="status" name="status" [(ngModel)]="form.status" required></div>
+            <div><label for="category">Categoria</label><select id="category" name="category" [(ngModel)]="form.category"><option>Shoes</option><option>Clothing</option><option>Accessories</option></select></div>
+            <div><label for="price">Preço (€)</label><input id="price" name="price" type="number" min="0" step="0.01" [(ngModel)]="form.price" placeholder="0.00"></div>
+            <div class="wide"><label for="image-files">Fotos do produto</label><input id="image-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple (change)="selectImages($event)"><small>Use “Procurar” para escolher fotos. Para adicionar mais, abra novamente. JPG, PNG, WebP ou GIF; até 5 MB por foto.</small></div>
+            <div><label for="slug">Slug do produto</label><input id="slug" name="slug" [(ngModel)]="form.slug" placeholder="novo-tenis" pattern="[a-z0-9]+(-[a-z0-9]+)*" required></div>
+          </div>
+          <div class="actions"><button type="submit" [disabled]="busy">{{ busy ? 'Salvando...' : (editingId ? 'Salvar alterações' : 'Adicionar produto') }}</button><button *ngIf="editingId" type="button" class="secondary" (click)="cancelEdit()">Cancelar edição</button></div>
+        </form>
+      </section>
+
+      <aside class="panel preview-panel" aria-live="polite">
+        <div class="preview-heading"><h2>Preview do produto</h2><span>{{ editingId ? 'EDIÇÃO' : 'NOVO' }}</span></div>
+        <div class="product-preview">
+          <div class="preview-photo">
+            <img *ngIf="selectedPreview; else emptyPreview" [src]="selectedPreview" [alt]="form.name || 'Foto do produto'">
+            <ng-template #emptyPreview><div class="empty-preview"><strong>Sem foto selecionada</strong><span>Escolha uma imagem para ver o preview.</span></div></ng-template>
+          </div>
+          <div class="preview-thumbnails" *ngIf="previewImages.length">
+            <div class="preview-thumb" *ngFor="let photo of previewImages; let i = index">
+              <button type="button" class="thumb-select" [class.active]="selectedPreviewIndex === i" (click)="selectPreview(i)" [attr.aria-label]="'Preview da foto ' + (i + 1)"><img [src]="photo" alt=""></button>
+              <button type="button" class="remove-photo" (click)="removeImage(i)" [attr.aria-label]="'Excluir foto ' + (i + 1)">&times;</button>
+            </div>
+          </div>
+          <div class="preview-details">
+            <div class="preview-brand">{{ form.brand || 'MARCA' }}</div>
+            <div class="preview-name">{{ form.name || 'Nome do produto' }}</div>
+            <div class="preview-price">{{ previewPrice }}</div>
+            <span class="preview-status">{{ form.status || 'STATUS' }}</span>
+            <div class="preview-category">{{ form.category }}</div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <section class="panel">
+      <h2>Catálogo <span class="muted">({{ products.length }})</span></h2>
+      <div class="row" *ngFor="let product of products">
+        <div><strong>{{ product.nome }}</strong><small>{{ product.marca }} &middot; {{ product.categoria }} &middot; {{ product.status }}<span *ngIf="product.preco !== undefined"> &middot; {{ formatPrice(product.preco) }}</span></small></div>
+        <div class="actions"><button type="button" class="secondary" [disabled]="busy" (click)="edit(product)">Editar</button><button type="button" class="danger" [disabled]="busy" (click)="remove(product)">Excluir</button></div>
+      </div>
+    </section>
+  </main>
+</div>
