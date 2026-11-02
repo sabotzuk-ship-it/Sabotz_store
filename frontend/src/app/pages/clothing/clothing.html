@@ -1,0 +1,37 @@
+<div class="page">
+  <header>
+    <a class="logo" routerLink="/">SABOTZ.</a>
+    <a class="back" routerLink="/">&#8592; BACK TO HOME</a>
+    <app-side-nav />
+  </header>
+  <main class="coming-soon" *ngIf="clothingCategory?.comingSoon; else clothingCatalog">
+    <img [src]="categoryImageUrl(clothingCategory?.image || 'clothing.jpg')" alt="SABOTZ clothing collection">
+    <div class="message">
+      <span>COMING SOON</span>
+      <h1>JACKETS &amp; CLOTHING</h1>
+      <p>Our clothing collection is on its way.</p>
+      <a routerLink="/">BACK TO HOME &#8599;</a>
+    </div>
+  </main>
+  <ng-template #clothingCatalog>
+    <main class="container">
+      <h1>JACKETS &amp; CLOTHING.</h1>
+      <p class="subtitle">EXPLORE OUR CLOTHING COLLECTION</p>
+      <div class="products">
+        <article class="product" *ngFor="let product of products">
+          <img [src]="'/' + product.fotos[0]" [alt]="product.nome" loading="lazy">
+          <div class="details">
+            <div class="brand">{{ product.marca.toUpperCase() }}</div>
+            <div class="name">{{ product.nome }}</div>
+            <div class="price" *ngIf="product.preco !== undefined">{{ formatPrice(product.preco) }}</div>
+            <div class="status">{{ product.status }}</div>
+            <a class="view" [routerLink]="['/products', productSlug(product)]">VIEW GALLERY &#8599;</a>
+          </div>
+        </article>
+      </div>
+      <p class="empty" *ngIf="error">{{ error }}</p>
+      <p class="empty" *ngIf="!error && !products.length">No clothing products available yet.</p>
+    </main>
+  </ng-template>
+  <footer>SABOTZ CLOTHING &amp; SUPPLY</footer>
+</div>

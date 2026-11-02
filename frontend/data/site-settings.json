@@ -1,0 +1,28 @@
+{
+  "categories": [
+    {
+      "id": "shoes",
+      "name": "Shoes",
+      "title": "SHOES",
+      "subtitle": "EXPLORE SNEAKERS",
+      "image": "shoes.jpg",
+      "comingSoon": false
+    },
+    {
+      "id": "clothing",
+      "name": "Clothing",
+      "title": "JACKETS & CLOTHING",
+      "subtitle": "HOODIES. TRACKSUITS. T-SHIRTS.",
+      "image": "clothing.jpg",
+      "comingSoon": true
+    },
+    {
+      "id": "accessories",
+      "name": "Accessories",
+      "title": "ACCESSORIES",
+      "subtitle": "SUNGLASSES. BAGS. MORE.",
+      "image": "accessories.jpg",
+      "comingSoon": true
+    }
+  ]
+}

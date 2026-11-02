@@ -1,0 +1,27 @@
+<div class="container">
+  <header>
+    <a class="logo" routerLink="/">SABOTZ.</a>
+    <a class="back" routerLink="/">&#8592; BACK TO HOME</a>
+    <app-side-nav />
+  </header>
+  <main>
+    <h1>ACCESSORIES.</h1>
+    <p class="subtitle">EXPLORE OUR ACCESSORIES COLLECTION</p>
+    <div class="search-box"><input type="search" [(ngModel)]="search" placeholder="Search accessories by name..." aria-label="Search accessories" autocomplete="off"></div>
+    <div class="products">
+      <article class="product" *ngFor="let product of visibleProducts">
+        <img [src]="'/' + product.fotos[0]" [alt]="product.nome" loading="lazy">
+        <div class="details">
+          <div class="brand">{{ product.marca.toUpperCase() }}</div>
+          <div class="name">{{ product.nome }}</div>
+          <div class="price" *ngIf="product.preco !== undefined">{{ formatPrice(product.preco) }}</div>
+          <div class="status">{{ product.status }}</div>
+          <a class="view" [routerLink]="['/products', productSlug(product)]">VIEW GALLERY &#8599;</a>
+        </div>
+      </article>
+    </div>
+    <p class="empty" *ngIf="error">{{ error }}</p>
+    <p class="empty" *ngIf="!error && products.length && !visibleProducts.length">No accessories available in this category yet.</p>
+  </main>
+  <footer>SABOTZ CLOTHING &amp; SUPPLY</footer>
+</div>

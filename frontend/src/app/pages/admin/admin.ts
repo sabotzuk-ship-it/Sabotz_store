@@ -3,8 +3,11 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminAuthService } from '../../data/admin-auth.service';
+import { CustomerOrder } from '../../data/order.model';
 import { Product } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
+import { StoreCategory, SiteSettings, defaultSiteSettings } from '../../data/site-settings.model';
+import { SiteSettingsService } from '../../data/site-settings.service';
 
 @Component({
   selector: 'app-admin-page',
@@ -22,7 +25,17 @@ export class AdminPage implements OnInit, OnDestroy {
   password = '';
   loginError = '';
   loadError = '';
+  ordersError = '';
+  settingsError = '';
+  settingsSaved = false;
+  categoryPendingDelete?: StoreCategory;
+  settings: SiteSettings = structuredClone(defaultSiteSettings);
+  newCategory: { name: string; subtitle: string; image: string; comingSoon: boolean; imageFile?: File; imagePreview?: string } = {
+    name: '', subtitle: '', image: 'accessories.jpg', comingSoon: true
+  };
   products: Product[] = [];
+  orders: CustomerOrder[] = [];
+  activeSection: 'products' | 'orders' | 'settings' = 'products';
   savedPhotos: string[] = [];
   imageFiles: File[] = [];
   imagePreviews: string[] = [];
@@ -33,6 +46,7 @@ export class AdminPage implements OnInit, OnDestroy {
   constructor(
     private readonly auth: AdminAuthService,
     private readonly productService: ProductService,
+    private readonly siteSettings: SiteSettingsService,
     private readonly changeDetector: ChangeDetectorRef
   ) {}
 
@@ -40,7 +54,7 @@ export class AdminPage implements OnInit, OnDestroy {
     try {
       const authenticated = await this.auth.checkSession();
       if (!this.loginInProgress) this.loggedIn = authenticated;
-      if (this.loggedIn) await this.loadProducts();
+      if (this.loggedIn) await Promise.all([this.loadProducts(), this.loadOrders(), this.loadSiteSettings()]);
     } catch {
       this.loadError = 'Server unavailable. Check that npm start is running.';
     } finally {
@@ -57,7 +71,7 @@ export class AdminPage implements OnInit, OnDestroy {
       await this.auth.login(this.username.trim(), this.password);
       this.password = '';
       this.loggedIn = true;
-      await this.loadProducts();
+      await Promise.all([this.loadProducts(), this.loadOrders(), this.loadSiteSettings()]);
     } catch (error) {
       this.loginError = error instanceof Error ? error.message : 'Could not sign in.';
     } finally {
@@ -73,6 +87,9 @@ export class AdminPage implements OnInit, OnDestroy {
     } finally {
       this.loggedIn = false;
       this.products = [];
+      this.orders = [];
+      this.releaseCategoryPreviews();
+      this.settings = structuredClone(defaultSiteSettings);
       this.cancelEdit();
       this.changeDetector.markForCheck();
     }
@@ -80,6 +97,7 @@ export class AdminPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.releaseImagePreviews();
+    this.releaseCategoryPreviews();
   }
 
   get previewImages(): string[] {
@@ -121,6 +139,144 @@ export class AdminPage implements OnInit, OnDestroy {
 
   formatPrice(price?: number): string {
     return this.productService.formatPrice(price);
+  }
+
+  formatOrderDate(date: string): string {
+    const parsed = new Date(date);
+    return Number.isNaN(parsed.getTime()) ? date : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(parsed);
+  }
+
+  categoryLabel(category: StoreCategory): string {
+    return category.title;
+  }
+
+  categoryImageUrl(image: string): string {
+    return image.startsWith('assets/') ? `/${image}` : `/assets/images/${image}`;
+  }
+
+  categoryHasProducts(category: StoreCategory): boolean {
+    return this.products.some(product => product.categoria === category.name);
+  }
+
+  categoryProductCount(category: StoreCategory): number {
+    return this.products.filter(product => product.categoria === category.name).length;
+  }
+
+  selectNewCategoryImage(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!this.isSupportedImage(file) || file.size > 5 * 1024 * 1024) {
+      this.settingsError = 'Escolha uma imagem JPG, PNG, WebP ou GIF de até 5 MB.';
+      return;
+    }
+    if (this.newCategory.imagePreview) URL.revokeObjectURL(this.newCategory.imagePreview);
+    this.newCategory.imageFile = file;
+    this.newCategory.imagePreview = URL.createObjectURL(file);
+    this.settingsError = '';
+  }
+
+  selectCategoryImage(event: Event, category: StoreCategory): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    if (!this.isSupportedImage(file) || file.size > 5 * 1024 * 1024) {
+      this.settingsError = 'Escolha uma imagem JPG, PNG, WebP ou GIF de até 5 MB.';
+      return;
+    }
+    if (category.imagePreview) URL.revokeObjectURL(category.imagePreview);
+    category.imageFile = file;
+    category.imagePreview = URL.createObjectURL(file);
+    this.settingsSaved = false;
+    this.settingsError = '';
+  }
+
+  addCategory(): void {
+    const name = this.newCategory.name.trim();
+    const slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    if (!name || !slug) {
+      this.settingsError = 'Digite um nome válido para a categoria.';
+      return;
+    }
+    if (this.settings.categories.some(category => category.name.toLowerCase() === name.toLowerCase() || category.id === slug)) {
+      this.settingsError = 'Já existe uma categoria com esse nome.';
+      return;
+    }
+    if (this.settings.categories.length >= 12) {
+      this.settingsError = 'O limite é de 12 categorias.';
+      return;
+    }
+    const title = name.toUpperCase();
+    this.settings.categories = [...this.settings.categories, {
+      id: slug,
+      name,
+      title,
+      subtitle: this.newCategory.subtitle.trim() || `EXPLORE ${title}`,
+      image: this.newCategory.image,
+      comingSoon: this.newCategory.comingSoon,
+      imageFile: this.newCategory.imageFile,
+      imagePreview: this.newCategory.imagePreview
+    }];
+    this.newCategory = { name: '', subtitle: '', image: 'accessories.jpg', comingSoon: true };
+    this.settingsSaved = false;
+    this.settingsError = '';
+  }
+
+  removeCategory(category: StoreCategory): void {
+    if (this.categoryHasProducts(category)) {
+      this.settingsError = `Mova ou exclua primeiro os produtos da categoria ${category.name}.`;
+      return;
+    }
+    this.categoryPendingDelete = category;
+  }
+
+  cancelCategoryDelete(): void {
+    this.categoryPendingDelete = undefined;
+  }
+
+  confirmCategoryDelete(): void {
+    const category = this.categoryPendingDelete;
+    if (!category) return;
+    if (category.imagePreview) URL.revokeObjectURL(category.imagePreview);
+    this.settings.categories = this.settings.categories.filter(item => item.id !== category.id);
+    this.categoryPendingDelete = undefined;
+    this.settingsSaved = false;
+    this.settingsError = '';
+  }
+
+  async saveSiteSettings(): Promise<void> {
+    this.busy = true;
+    this.settingsError = '';
+    this.settingsSaved = false;
+    try {
+      const categories = this.settings.categories;
+      const files = categories.flatMap(category => category.imageFile ? [category.imageFile] : []);
+      const uploadedImages = files.length ? await this.productService.uploadProductImages(files) : [];
+      let uploadIndex = 0;
+      const settingsToSave: SiteSettings = {
+        categories: categories.map(category => ({
+          id: category.id,
+          name: category.name,
+          title: category.title,
+          subtitle: category.subtitle,
+          image: category.imageFile ? uploadedImages[uploadIndex++] : category.image,
+          comingSoon: category.comingSoon
+        }))
+      };
+      const savedSettings = await this.siteSettings.saveSettings(settingsToSave);
+      categories.forEach(category => {
+        if (category.imagePreview) URL.revokeObjectURL(category.imagePreview);
+      });
+      this.settings = savedSettings;
+      this.settingsSaved = true;
+    } catch (error) {
+      this.settingsError = error instanceof Error ? error.message : 'Could not save site settings.';
+    } finally {
+      this.busy = false;
+      this.changeDetector.markForCheck();
+    }
   }
 
   selectImages(event: Event): void {
@@ -229,6 +385,38 @@ export class AdminPage implements OnInit, OnDestroy {
     } finally {
       this.changeDetector.markForCheck();
     }
+  }
+
+  async loadOrders(): Promise<void> {
+    try {
+      const response = await fetch('/api/admin/orders', { credentials: 'same-origin', cache: 'no-store' });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || 'Could not load customer orders.');
+      this.orders = (Array.isArray(body) ? body : []) as CustomerOrder[];
+      this.ordersError = '';
+    } catch (error) {
+      this.ordersError = error instanceof Error ? error.message : 'Could not load customer orders.';
+    } finally {
+      this.changeDetector.markForCheck();
+    }
+  }
+
+  private async loadSiteSettings(): Promise<void> {
+    try {
+      this.settings = await this.siteSettings.getSettings();
+      this.settingsError = '';
+    } catch (error) {
+      this.settingsError = error instanceof Error ? error.message : 'Could not load site settings.';
+    } finally {
+      this.changeDetector.markForCheck();
+    }
+  }
+
+  private releaseCategoryPreviews(): void {
+    this.settings.categories.forEach(category => {
+      if (category.imagePreview) URL.revokeObjectURL(category.imagePreview);
+    });
+    if (this.newCategory.imagePreview) URL.revokeObjectURL(this.newCategory.imagePreview);
   }
 
   private emptyForm() {
