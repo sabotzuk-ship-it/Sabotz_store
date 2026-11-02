@@ -13,18 +13,17 @@ try {
   if (process.env.ADMIN_USERNAME && process.env.ADMIN_PASSWORD && process.env.SESSION_SECRET) {
     console.log('Using admin credentials supplied by the environment.');
   } else {
-    const password = crypto.randomBytes(24).toString('base64url');
     const sessionSecret = crypto.randomBytes(48).toString('base64url');
     const contents = [
-      'ADMIN_USERNAME=admin',
-      `ADMIN_PASSWORD=${password}`,
+      'ADMIN_USERNAME=sabotz',
+      'ADMIN_PASSWORD=admin',
       `SESSION_SECRET=${sessionSecret}`,
       ''
     ].join('\n');
     await fs.writeFile(environmentFile, contents, { encoding: 'utf8', flag: 'wx', mode: 0o600 });
-    console.log('\nCreated frontend/.env with a one-time admin login:');
-    console.log('Username: admin');
-    console.log(`Password: ${password}`);
-    console.log('Keep this password private. It is saved locally in frontend/.env.\n');
+    console.log('\nCreated frontend/.env with local development credentials:');
+    console.log('Username: sabotz');
+    console.log('Password: admin');
+    console.log('Development login only. Set strong credentials before deploying.\n');
   }
 }

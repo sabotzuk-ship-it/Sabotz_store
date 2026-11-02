@@ -14,6 +14,8 @@ const adminPassword = process.env.ADMIN_PASSWORD;
 const sessionSecret = process.env.SESSION_SECRET;
 const isProduction = process.env.NODE_ENV === 'production';
 const catalogPath = path.join(currentDirectory, 'public', 'data', 'products.json');
+const ordersPath = path.join(currentDirectory, 'data', 'orders.json');
+const siteSettingsPath = path.join(currentDirectory, 'data', 'site-settings.json');
 const imageUploadDirectory = path.join(currentDirectory, 'public', 'assets', 'images', 'uploads');
 
 if (!adminUsername || !adminPassword || !sessionSecret || sessionSecret.length < 32) {
@@ -49,7 +51,14 @@ app.use('/api/admin', (req, res, next) => {
 });
 
 const loginAttempts = new Map();
-const categories = new Set(['Shoes', 'Clothing', 'Accessories']);
+const defaultSiteSettings = {
+  categories: [
+    { id: 'shoes', name: 'Shoes', title: 'SHOES', subtitle: 'EXPLORE SNEAKERS', image: 'shoes.jpg', comingSoon: false },
+    { id: 'clothing', name: 'Clothing', title: 'JACKETS & CLOTHING', subtitle: 'HOODIES. TRACKSUITS. T-SHIRTS.', image: 'clothing.jpg', comingSoon: true },
+    { id: 'accessories', name: 'Accessories', title: 'ACCESSORIES', subtitle: 'SUNGLASSES. BAGS. MORE.', image: 'accessories.jpg', comingSoon: false }
+  ]
+};
+const categoryImages = new Set(['shoes.jpg', 'clothing.jpg', 'accessories.jpg']);
 const acceptedImageTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
 const imageUpload = multer({
   storage: multer.memoryStorage(),
@@ -78,7 +87,7 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-function validateProduct(body) {
+function validateProduct(body, allowedCategories) {
   const nome = typeof body?.nome === 'string' ? body.nome.trim() : '';
   const marca = typeof body?.marca === 'string' ? body.marca.trim() : '';
   const status = typeof body?.status === 'string' ? body.status.trim() : '';
@@ -90,7 +99,7 @@ function validateProduct(body) {
   if (!nome || nome.length > 140) return 'Product name is required (maximum 140 characters).';
   if (!marca || marca.length > 80) return 'Brand is required (maximum 80 characters).';
   if (!status || status.length > 60) return 'Status is required (maximum 60 characters).';
-  if (!categories.has(categoria)) return 'Choose a valid product category.';
+  if (!allowedCategories.has(categoria)) return 'Choose a valid product category.';
   if (preco !== undefined && (typeof preco !== 'number' || !Number.isFinite(preco) || preco < 0 || preco > 10000000)) return 'Enter a valid non-negative product price.';
   if (!/^(?:products\/)?[a-z0-9]+(?:-[a-z0-9]+)*(?:\.html)?$/.test(pagina)) return 'Use a lowercase product slug, for example products/new-shoe.html.';
   if (!fotos.length || fotos.length > 20) return 'Add between 1 and 20 product images.';
@@ -113,8 +122,36 @@ async function writeProducts(produtos) {
   await fs.rename(temporaryPath, catalogPath);
 }
 
+async function readSiteSettings() {
+  const contents = await fs.readFile(siteSettingsPath, 'utf8').catch(error => error.code === 'ENOENT' ? null : Promise.reject(error));
+  if (!contents) return defaultSiteSettings;
+  const stored = JSON.parse(contents);
+  if (stored?.comingSoon) {
+    return {
+      categories: defaultSiteSettings.categories.map(category => ({
+        ...category,
+        comingSoon: Boolean(stored.comingSoon[category.name])
+      }))
+    };
+  }
+  if (!Array.isArray(stored?.categories) || stored.categories.some(category => !category?.id || !category?.name || typeof category.comingSoon !== 'boolean')) {
+    throw new Error('The site settings file has an invalid format.');
+  }
+  return stored;
+}
+
+async function writeSiteSettings(settings) {
+  const temporaryPath = `${siteSettingsPath}.${crypto.randomUUID()}.tmp`;
+  await fs.writeFile(temporaryPath, `${JSON.stringify(settings, null, 2)}\n`, 'utf8');
+  await fs.rename(temporaryPath, siteSettingsPath);
+}
+
 async function cleanupUnusedUploadedPhotos(photos, products) {
-  const referencedPhotos = new Set(products.flatMap(product => product.fotos ?? []));
+  const settings = await readSiteSettings();
+  const referencedPhotos = new Set([
+    ...products.flatMap(product => product.fotos ?? []),
+    ...settings.categories.map(category => category.image)
+  ]);
   const uploadPrefix = 'assets/images/uploads/';
   const unusedFiles = photos
     .filter(photo => photo.startsWith(uploadPrefix) && !referencedPhotos.has(photo))
@@ -128,6 +165,15 @@ app.get('/api/products', async (_req, res, next) => {
   try {
     res.set('Cache-Control', 'no-store');
     res.json(await readProducts());
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/site-settings', async (_req, res, next) => {
+  try {
+    res.set('Cache-Control', 'no-store');
+    res.json(await readSiteSettings());
   } catch (error) {
     next(error);
   }
@@ -160,6 +206,67 @@ app.post('/api/admin/login', (req, res, next) => {
 });
 
 app.get('/api/admin/session', requireAdmin, (_req, res) => res.json({ authenticated: true }));
+
+app.get('/api/admin/orders', requireAdmin, async (_req, res, next) => {
+  try {
+    const contents = await fs.readFile(ordersPath, 'utf8').catch(error => error.code === 'ENOENT' ? '[]' : Promise.reject(error));
+    const orders = JSON.parse(contents);
+    if (!Array.isArray(orders)) throw new Error('The orders file has an invalid format.');
+    res.set('Cache-Control', 'no-store');
+    res.json(orders);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.put('/api/admin/site-settings', requireAdmin, async (req, res, next) => {
+  try {
+    const categories = req.body?.categories;
+    if (!Array.isArray(categories) || categories.length > 12) {
+      return res.status(400).json({ error: 'Add up to 12 store categories.' });
+    }
+    const ids = new Set();
+    const names = new Set();
+    for (const category of categories) {
+      const id = typeof category?.id === 'string' ? category.id : '';
+      const name = typeof category?.name === 'string' ? category.name.trim() : '';
+      const title = typeof category?.title === 'string' ? category.title.trim() : '';
+      const subtitle = typeof category?.subtitle === 'string' ? category.subtitle.trim() : '';
+      const builtInImage = categoryImages.has(category.image);
+      const uploadedImage = typeof category.image === 'string' && /^assets\/images\/uploads\/[a-f0-9-]{36}\.(?:jpg|png|webp|gif)$/i.test(category.image);
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id) || !name || name.length > 60 || !title || title.length > 80 || subtitle.length > 100 || (!builtInImage && !uploadedImage) || typeof category.comingSoon !== 'boolean') {
+        return res.status(400).json({ error: 'Check the category name, title, description, image and coming soon option.' });
+      }
+      if (uploadedImage) {
+        await fs.access(path.join(currentDirectory, 'public', category.image)).catch(() => {
+          throw Object.assign(new Error('Upload the category image before saving.'), { status: 400 });
+        });
+      }
+      if (ids.has(id) || names.has(name.toLowerCase())) return res.status(409).json({ error: 'Category names must be unique.' });
+      ids.add(id);
+      names.add(name.toLowerCase());
+    }
+    const products = await readProducts();
+    if (products.some(product => !names.has(product.categoria.toLowerCase()))) {
+      return res.status(409).json({ error: 'Move or remove the products from a category before deleting it.' });
+    }
+    const previousSettings = await readSiteSettings();
+    const settings = { categories: categories.map(category => ({
+      id: category.id,
+      name: category.name.trim(),
+      title: category.title.trim(),
+      subtitle: category.subtitle.trim(),
+      image: category.image,
+      comingSoon: category.comingSoon
+    })) };
+    await writeSiteSettings(settings);
+    await cleanupUnusedUploadedPhotos(previousSettings.categories.map(category => category.image), products);
+    res.set('Cache-Control', 'no-store');
+    res.json(settings);
+  } catch (error) {
+    next(error);
+  }
+});
 
 app.post('/api/admin/uploads', requireAdmin, (req, res, next) => {
   imageUpload.array('images', 20)(req, res, async error => {
@@ -208,7 +315,8 @@ app.post('/api/admin/logout', requireAdmin, (req, res, next) => {
 
 app.post('/api/admin/products', requireAdmin, async (req, res, next) => {
   try {
-    const validationError = validateProduct(req.body);
+    const settings = await readSiteSettings();
+    const validationError = validateProduct(req.body, new Set(settings.categories.map(category => category.name)));
     if (validationError) return res.status(400).json({ error: validationError });
     const products = await readProducts();
     const page = req.body.pagina.trim();
@@ -224,7 +332,8 @@ app.post('/api/admin/products', requireAdmin, async (req, res, next) => {
 
 app.put('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
   try {
-    const validationError = validateProduct(req.body);
+    const settings = await readSiteSettings();
+    const validationError = validateProduct(req.body, new Set(settings.categories.map(category => category.name)));
     if (validationError) return res.status(400).json({ error: validationError });
     const products = await readProducts();
     const index = products.findIndex(product => product.id === req.params.id);
@@ -269,7 +378,8 @@ app.get(/^(?!\/api\/).*/, (_req, res, next) => {
 app.use((error, _req, res, _next) => {
   console.error(error);
   if (res.headersSent) return;
-  res.status(500).json({ error: 'An internal server error occurred.' });
+  const status = Number.isInteger(error.status) && error.status >= 400 && error.status < 600 ? error.status : 500;
+  res.status(status).json({ error: status === 500 ? 'An internal server error occurred.' : error.message });
 });
 
 app.listen(port, () => console.log(`SABOTZ server listening on http://localhost:${port}`));

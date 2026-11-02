@@ -19,7 +19,7 @@ Requisitos: Node.js 22.22.3 ou mais recente e npm.
    npm start
    ```
 
-   Na primeira execução, o projeto cria `frontend/.env` e mostra no terminal o usuário `admin` e uma senha aleatória. Guarde essa senha. O arquivo `.env` não é enviado ao Git.
+   Na primeira execução, o projeto cria `frontend/.env` com as credenciais locais de desenvolvimento: usuário `sabotz` e senha `admin`. O arquivo `.env` não é enviado ao Git. Essas credenciais padrão são somente para desenvolvimento local; defina credenciais fortes antes de qualquer implantação.
 
 4. Abra <http://localhost:4200>. Use o link **ADMIN** no rodapé ou acesse <http://localhost:4200/admin>.
 
