@@ -1,0 +1,6 @@
+:host { display: block; padding: 28px 0; margin-top: 28px; border-block: 1px solid #303030; }
+section { display: grid; grid-template-columns: 1fr minmax(340px, 440px); align-items: center; gap: 24px; }
+.eyebrow { margin: 0 0 6px; font-size: 9px; line-height: 1.7; letter-spacing: 2px; color: #999; }
+h2 { margin: 0; font-size: 25px; letter-spacing: -.8px; }
+.description { margin: 8px 0 0; color: #999; font-size: 11px; line-height: 1.7; }
+@media (max-width: 700px) { :host { padding-block: 24px; } section { grid-template-columns: 1fr; gap: 20px; } }

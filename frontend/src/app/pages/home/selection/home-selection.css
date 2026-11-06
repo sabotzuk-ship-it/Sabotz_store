@@ -1,0 +1,21 @@
+:host { display: block; margin-top: 72px; padding-top: 32px; border-top: 1px solid #444; }
+* { box-sizing: border-box; }
+a { color: inherit; text-decoration: none; }
+a:focus-visible { outline: 2px solid white; outline-offset: 6px; }
+.eyebrow { margin: 0 0 12px; font-size: 9px; line-height: 1.7; letter-spacing: 2px; }
+.product-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.editorial { display: grid; grid-template-columns: 1.15fr 1fr; background: #151515; }
+.editorial-photo { position: relative; min-width: 0; }
+.editorial-photo img { display: block; width: 100%; height: 100%; max-height: 490px; object-fit: cover; object-position: center 45%; }
+.photo-caption { position: absolute; left: 24px; bottom: 24px; right: 24px; font-size: 8px; letter-spacing: 1.4px; text-shadow: 0 1px 4px black; }
+.editorial-copy { align-self: center; padding: clamp(28px, 4vw, 46px); }
+.editorial-copy h2 { font-size: clamp(25px, 3.5vw, 38px); line-height: 1.12; letter-spacing: -1.3px; margin: 25px 0 18px; }
+.editorial-description { color: #a4a4a4; font-size: 12px; line-height: 1.9; margin: 0 0 30px; max-width: 300px; }
+.outline-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 20px; border: 1px solid #777; padding: 16px 18px; font-size: 9px; letter-spacing: 1.1px; transition: background .2s, color .2s; }
+.outline-link:hover { background: #f5f4f0; color: #111; }
+.selection-pieces { padding-top: 32px; scroll-margin-top: 24px; }
+.selection-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+.selection-heading > span { font-size: 8px; letter-spacing: 1.5px; color: #888; }
+.selection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+@media (max-width: 600px) { :host { margin-top: 46px; padding-top: 24px; } .eyebrow { font-size: 8px; } .editorial { grid-template-columns: 1fr; } .editorial-photo img { height: 300px; } .editorial-copy { padding: 30px 24px; } .editorial-copy h2 { font-size: clamp(26px, 7.6vw, 34px); } .outline-link { min-height: 48px; } .selection-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; } .selection-heading { align-items: start; flex-direction: column; gap: 0; margin-bottom: 20px; } }

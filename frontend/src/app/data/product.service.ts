@@ -17,7 +17,7 @@ export class ProductService {
 
   formatPrice(price?: number): string {
     if (price === undefined || !Number.isFinite(price)) return '';
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'EUR' }).format(price);
+    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(price);
   }
 
   getProducts(): Promise<Product[]> {

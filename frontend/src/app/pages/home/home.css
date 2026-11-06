@@ -1,18 +1,34 @@
 :host { display: block; min-height: 100vh; }
-.home-page { min-height: 100vh; background: #0c0c0c; color: #fff; font-family: Arial, Helvetica, sans-serif; }
+.home-page { background: #0c0c0c; color: #f5f4f0; font-family: Arial, Helvetica, sans-serif; }
 * { box-sizing: border-box; }
 a { color: inherit; text-decoration: none; }
-.site-header { max-width: 1100px; margin: auto; padding: 30px 22px 25px; display: flex; align-items: center; justify-content: space-between; }
-.logo { font-size: 31px; font-weight: 900; letter-spacing: -1px; }
-.categories { max-width: 1100px; margin: auto; padding: 0 16px 40px; display: grid; gap: 16px; }
-.category { position: relative; display: block; height: 310px; overflow: hidden; border-radius: 5px; background: #222; }
-.category img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
-.category:hover img { transform: scale(1.04); }
-.category::after { content: ""; position: absolute; inset: 0; background: linear-gradient(transparent 35%, rgba(0, 0, 0, 0.85)); }
-.category-content { position: absolute; bottom: 24px; left: 22px; right: 22px; z-index: 1; display: flex; align-items: end; justify-content: space-between; }
-.category h2 { margin: 0; font-size: 30px; font-weight: 900; letter-spacing: -0.5px; }
-.category p { margin: 8px 0 0; color: #ddd; font-size: 11px; letter-spacing: 2px; }
-.arrow { font-size: 32px; font-weight: 300; }
-.coming-soon-badge { position: absolute; top: 18px; right: 18px; z-index: 2; padding: 9px 12px; border: 1px solid rgba(255,255,255,.65); background: rgba(0,0,0,.65); color: white; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; }
-footer { padding: 30px; text-align: center; color: #888; font-size: 11px; letter-spacing: 1px; }
-@media (min-width: 850px) { .site-header { padding-top: 40px; } .categories { grid-template-columns: repeat(3, 1fr); gap: 20px; } .category { height: 480px; } .category h2 { font-size: 25px; } }
+a:focus-visible { outline: 2px solid white; outline-offset: 6px; }
+.site-header, main, .site-footer { width: min(1100px, 100%); margin: auto; padding-inline: 20px; }
+.site-header { padding-block: 32px 28px; display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 31px; font-weight: 900; letter-spacing: -1.5px; }
+.categories { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.category { position: relative; display: block; height: 480px; overflow: hidden; border-radius: 3px; background: #222; }
+.category img { width: 100%; height: 100%; object-fit: cover; }
+.category::after { content: ''; position: absolute; inset: 0; background: linear-gradient(transparent 40%, #000b); }
+.category-content { position: absolute; bottom: 24px; left: 22px; right: 22px; z-index: 1; display: flex; align-items: end; justify-content: space-between; gap: 12px; }
+.category h2 { margin: 0; font-size: 25px; font-weight: 900; letter-spacing: -.6px; overflow-wrap: break-word; }
+.category p { margin: 9px 0 0; color: #ddd; font-size: 10px; line-height: 1.6; letter-spacing: 1.7px; }
+.arrow { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid #ffffff50; border-radius: 50%; background: #0c0c0c45; font-size: 19px; flex-shrink: 0; }
+.coming-soon-badge { position: absolute; top: 18px; right: 18px; z-index: 2; padding: 9px 12px; border: 1px solid #ffffff90; background: #0009; font-size: 9px; font-weight: bold; letter-spacing: 1.5px; }
+.content-section { margin-top: 72px; padding-top: 32px; border-top: 1px solid #444; }
+.section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+.eyebrow { margin: 0 0 12px; font-size: 9px; line-height: 1.7; letter-spacing: 2px; }
+h1 { margin: 0; font-size: clamp(26px, 3.6vw, 38px); font-weight: 900; letter-spacing: -1.5px; line-height: 1.1; }
+.text-link { display: inline-flex; align-items: center; gap: 20px; padding: 10px 0; border-bottom: 1px solid #777; font-size: 9px; font-weight: bold; letter-spacing: 1.5px; white-space: nowrap; }
+.text-link span { font-size: 19px; }
+.product-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.collection-message { color: #aaa; padding-block: 22px; font-size: 13px; line-height: 1.7; }
+.site-footer { margin-top: 72px; padding-bottom: 26px; }
+.footer-main { border-top: 1px solid #555; padding-block: 30px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.footer-logo { font-size: clamp(54px, 8vw, 90px); line-height: 1; font-weight: 900; letter-spacing: -5px; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.footer-main app-social-links { width: min(420px, 100%); }
+@media (max-width: 380px) { .logo { font-size: 26px; } .header-actions { gap: 8px; } }
+.footer-bottom { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid #333; padding-top: 20px; color: #999; font-size: 8px; line-height: 1.8; letter-spacing: 1.4px; }
+@media (max-width: 849px) { .categories { gap: 14px; } .category { height: 360px; } .category-content { left: 15px; right: 15px; bottom: 20px; } .category h2 { font-size: 20px; } .category p { letter-spacing: 1px; } .coming-soon-badge { top: 12px; right: 12px; padding: 8px; font-size: 8px; } .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 14px; } }
+@media (max-width: 600px) { .site-header { padding-block: 22px; } .site-header, main, .site-footer { padding-inline: 18px; } .categories { grid-template-columns: 1fr; gap: 14px; } .category { height: 340px; } .category h2 { font-size: clamp(22px, 6.4vw, 28px); } .category-content { left: 22px; right: 22px; } .category p { font-size: 10px; } .content-section { margin-top: 46px; padding-top: 24px; } .section-heading { align-items: start; flex-direction: column; gap: 12px; } .eyebrow { font-size: 8px; } .footer-main { align-items: start; flex-direction: column; gap: 16px; } .footer-logo { font-size: clamp(52px, 15vw, 68px); letter-spacing: -3px; } .footer-bottom { flex-direction: column; gap: 8px; } .site-footer { margin-top: 46px; } }

@@ -1,6 +1,6 @@
+import { CatalogFilters } from '../../shared/catalog-filters/catalog-filters';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Product } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
@@ -9,13 +9,12 @@ import { SideNav } from '../../shared/side-nav/side-nav';
 @Component({
   selector: 'app-accessories-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, SideNav],
+  imports: [CommonModule, RouterLink, SideNav, CatalogFilters],
   templateUrl: './accessories.html',
   styleUrl: '../shoes/shoes.css'
 })
 export class AccessoriesPage implements OnInit {
   products: Product[] = [];
-  search = '';
   error = '';
 
   constructor(
@@ -31,11 +30,6 @@ export class AccessoriesPage implements OnInit {
     } finally {
       this.changeDetector.markForCheck();
     }
-  }
-
-  get visibleProducts(): Product[] {
-    const term = this.search.trim().toLowerCase();
-    return this.products.filter(product => product.nome.toLowerCase().includes(term) || product.marca.toLowerCase().includes(term));
   }
 
   productSlug(product: Product): string {

@@ -9,6 +9,7 @@ import { ProductPage } from './pages/product/product';
 
 export const routes: Routes = [
   { path: '', component: HomePage, title: 'SABOTZ | Clothing & Supply' },
+  { path: 'collection', component: CategoryPage, data: { allProducts: true }, title: 'All Pieces | SABOTZ' },
   { path: 'shoes', component: ShoesPage, title: 'Shoes | SABOTZ Clothing & Supply' },
   { path: 'accessories', component: AccessoriesPage, title: 'Accessories | SABOTZ Clothing & Supply' },
   { path: 'clothing', component: ClothingPage, title: 'Clothing | SABOTZ Clothing & Supply' },

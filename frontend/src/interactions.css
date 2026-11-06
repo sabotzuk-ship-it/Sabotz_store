@@ -1,0 +1,25 @@
+:root { --soft-ease: cubic-bezier(.22, 1, .36, 1); }
+.icon-arrow { display: inline-block; width: 1.15em; height: 1.15em; vertical-align: -.2em; flex-shrink: 0; pointer-events: none; }
+/* Shared timing keeps route links, admin actions and catalogue controls consistent. */
+body :is(a[href], button, summary, input[type="button"], input[type="submit"]):not(:disabled):not(.menu-backdrop) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: color .3s var(--soft-ease), background-color .3s var(--soft-ease), border-color .3s var(--soft-ease), box-shadow .4s var(--soft-ease), opacity .25s ease, scale .32s var(--soft-ease), translate .35s var(--soft-ease), transform .4s var(--soft-ease), filter .3s ease;
+}
+body :is(a[href], button, summary):not(:disabled):not(.menu-backdrop):active,
+body .soft-pressed:not(:disabled) { scale: .975; opacity: .9; }
+body :is(a[href], button, summary):focus-visible { outline: 2px solid #f5f4f0; outline-offset: 5px; }
+a.category img { transition: transform .85s var(--soft-ease), filter .6s ease; }
+a.category :is(.category-content, .arrow) { transition: transform .6s var(--soft-ease); }
+a.category:active img, a.category.soft-pressed img { transform: scale(1.025); }
+a.category::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(110deg, transparent 30%, #ffffff0d 48%, transparent 65%); transform: translateX(-120%); pointer-events: none; }
+.text-link > span, .outline-link > span { transition: transform .4s var(--soft-ease); }
+@media (hover: hover) and (pointer: fine) {
+  body :is(a[href], button, summary):not(:disabled):not(.menu-backdrop):hover { translate: 0 -2px; filter: brightness(1.08); }
+  a.category:hover { box-shadow: 0 16px 40px #0006, 0 0 0 1px #ffffff30; }
+  a.category:hover img { transform: scale(1.065); filter: brightness(1.08); }
+  a.category:hover .category-content { transform: translateY(-5px); }
+  a.category:hover .arrow { transform: translate(4px,-4px); }
+  a.category:hover::before { transform: translateX(120%); transition: transform 1.1s var(--soft-ease); }
+  :is(.text-link, .outline-link):hover > span { transform: translate(3px,-3px); }
+}

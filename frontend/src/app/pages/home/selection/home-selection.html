@@ -1,0 +1,20 @@
+<section class="selection" aria-labelledby="selection-title" *ngIf="products.length">
+      <div class="editorial">
+        <div class="editorial-photo">
+          <img src="/assets/images/shoes.jpg" alt="A closer look at the details of the SABOTZ sneaker selection" width="640" height="800" loading="lazy">
+          <span class="photo-caption">A CLOSER LOOK. A DIFFERENT PERSPECTIVE.</span>
+        </div>
+        <div class="editorial-copy">
+          <p class="eyebrow">SABOTZ SELECTION / 001</p>
+          <h2 id="selection-title">DETAILS MAKE<br>THE DIFFERENCE.</h2>
+          <p class="editorial-description">Distinctive silhouettes. Considered details. A selection of sneakers and accessories that speaks for itself.</p>
+          <a class="outline-link" href="#selection-pieces">EXPLORE THE SELECTION <span aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></span></a>
+        </div>
+      </div>
+      <div id="selection-pieces" class="selection-pieces">
+        <div class="selection-heading"><p class="eyebrow">THE SELECTED PIECES</p><span>{{ products.length < 10 ? '0' : '' }}{{ products.length }} / SABOTZ SELECTION</span></div>
+        <div class="product-grid selection-grid">
+          <app-home-product-card *ngFor="let product of products" [product]="product" />
+        </div>
+      </div>
+    </section>

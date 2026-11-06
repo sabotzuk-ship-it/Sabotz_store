@@ -1,4 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
+@import './interactions.css';
 html, body { min-height: 100%; margin: 0; }
 body { font-family: Arial, Helvetica, sans-serif; }
 .dashboard-tabs { display: flex; gap: 8px; margin: 0 0 20px; border-bottom: 1px solid #333; }

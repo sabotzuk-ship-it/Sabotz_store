@@ -1,0 +1,16 @@
+:host { display: block; min-width: 0; }
+* { box-sizing: border-box; }
+.social-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.stacked { grid-template-columns: 1fr; }
+a { display: flex; align-items: center; gap: 13px; min-height: 68px; padding: 16px 18px; border: 1px solid #454545; background: #151515; color: #f5f4f0; text-decoration: none; border-radius: 3px; }
+.social-icon { width: 26px; height: 26px; flex-shrink: 0; }
+.social-label { font: 600 10px Arial, Helvetica, sans-serif; letter-spacing: 1.3px; }
+.social-arrow { margin-left: auto; font-size: 19px; transition: transform .4s cubic-bezier(.22,1,.36,1); }
+a:focus-visible { outline: 2px solid #fff; outline-offset: 5px; }
+a:active { background: #292929; border-color: #aaa; }
+.compact { display: flex; gap: 8px; }
+.compact a { justify-content: center; width: 40px; min-height: 40px; padding: 9px; background: transparent; border-color: #383838; border-radius: 50%; }
+.compact .social-icon { width: 21px; height: 21px; }
+.compact .social-label, .compact .social-arrow { display: none; }
+@media (hover: hover) and (pointer: fine) { a:hover { background: #f1f0ec; color: #111; border-color: #f1f0ec; box-shadow: 0 8px 28px #0002; } a:hover .social-arrow { transform: translate(3px,-3px); } }
+@media (max-width: 600px) { .social-links { gap: 10px; } a { gap: 9px; padding: 15px 12px; min-height: 64px; } .social-label { font-size: 9px; letter-spacing: .8px; } .social-icon { width: 23px; height: 23px; } .compact { gap: 6px; } }

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { defaultSiteSettings, SiteSettings } from '../../data/site-settings.model';
 import { SiteSettingsService } from '../../data/site-settings.service';
+import { SocialLinks } from '../social-links/social-links';
 
 @Component({
   selector: 'app-side-nav',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, SocialLinks],
   templateUrl: './side-nav.html',
   styleUrl: './side-nav.css'
 })

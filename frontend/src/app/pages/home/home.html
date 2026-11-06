@@ -1,16 +1,36 @@
 <div class="home-page">
   <header class="site-header">
-    <a routerLink="/" class="logo">SABOTZ.</a>
-    <app-side-nav />
+    <a routerLink="/" class="logo" aria-label="SABOTZ home">SABOTZ.</a>
+    <div class="header-actions"><app-social-links [compact]="true" /><app-side-nav /></div>
   </header>
-
-  <main class="categories">
-    <a *ngFor="let category of settings.categories" [routerLink]="['/categories', category.id]" class="category">
-      <img [src]="categoryImageUrl(category.image)" [alt]="'Explore ' + category.title">
-      <span class="coming-soon-badge" *ngIf="category.comingSoon">EM BREVE</span>
-      <div class="category-content"><div><h2>{{ category.title }}</h2><p>{{ category.subtitle }}</p></div><span class="arrow">&#8599;</span></div>
-    </a>
+  <main>
+    <section class="categories" aria-label="Explore the collections">
+      <a *ngFor="let category of settings.categories" [routerLink]="['/categories', category.id]" class="category">
+        <img [src]="categoryImageUrl(category.image)" [alt]="'Explore ' + category.title" width="640" height="900">
+        <span class="coming-soon-badge" *ngIf="category.comingSoon">COMING SOON</span>
+        <div class="category-content"><div><h2>{{ category.title }}</h2><p>{{ category.subtitle }}</p></div><span class="arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></span></div>
+      </a>
+    </section>
+    <app-contact-strip />
+    <section class="arrivals content-section" aria-labelledby="arrivals-title" [attr.aria-busy]="productsLoading">
+      <div class="section-heading">
+        <div><p class="eyebrow">JUST ADDED TO THE COLLECTION</p><h1 id="arrivals-title">LATEST ARRIVALS.</h1></div>
+        <a class="text-link" routerLink="/collection">EXPLORE ALL <span aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></span></a>
+      </div>
+      <div class="product-grid" *ngIf="latestProducts.length">
+        <app-home-product-card *ngFor="let product of latestProducts" [product]="product" />
+      </div>
+      <p class="collection-message" role="status" *ngIf="productsLoading">Loading the latest pieces...</p>
+      <p class="collection-message" role="status" *ngIf="productsError">{{ productsError }}</p>
+      <p class="collection-message" *ngIf="!productsLoading && !productsError && !latestProducts.length">New pieces are on their way. Explore our collections above.</p>
+    </section>
+    <app-home-selection *ngIf="selectedProducts.length" [products]="selectedProducts" />
   </main>
-
-  <footer>SABOTZ CLOTHING &amp; SUPPLY</footer>
+  <footer class="site-footer">
+    <div class="footer-main">
+      <a class="footer-logo" routerLink="/" aria-label="SABOTZ home">SABOTZ.</a>
+      <app-social-links />
+    </div>
+    <div class="footer-bottom"><span>CLOTHING &amp; SUPPLY</span><span>&copy; {{ year }} SABOTZ. ALL RIGHTS RESERVED.</span></div>
+  </footer>
 </div>
