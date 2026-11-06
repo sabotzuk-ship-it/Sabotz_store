@@ -1,0 +1,29 @@
+<section class="catalog-tools" aria-label="Collection filters">
+  <div class="toolbar">
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
+      <input type="search" [(ngModel)]="search" placeholder="Search the collection" aria-label="Search products by name or brand" autocomplete="off">
+    </label>
+    <span class="result-count" role="status" aria-live="polite">{{ visibleProducts.length }} / {{ products.length }} PIECES</span>
+  </div>
+  <details class="brand-panel">
+    <summary>
+      <span class="filter-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 7h18M3 17h18"/><circle cx="8" cy="7" r="3" fill="currentColor"/><circle cx="16" cy="17" r="3" fill="currentColor"/></svg>BRANDS <span class="selection-count" *ngIf="selectedBrands.length">{{ selectedBrands.length }}</span></span>
+      <span class="panel-hint">CURATE YOUR SELECTION <span class="plus" aria-hidden="true">+</span></span>
+    </summary>
+    <div class="brand-content">
+      <div class="panel-heading"><span>THE BRAND EDIT</span><span>SELECT ONE OR MORE</span></div>
+      <div class="brand-grid" role="group" aria-label="Filter by brand">
+        <button class="brand-option all-brands" type="button" [class.selected]="!selectedBrands.length" [attr.aria-pressed]="!selectedBrands.length" (click)="selectedBrands = []"><span>ALL BRANDS</span><span class="brand-count">{{ products.length }}</span></button>
+        <button class="brand-option" type="button" *ngFor="let brand of brands" [class.selected]="selectedBrands.includes(brand.key)" [attr.aria-pressed]="selectedBrands.includes(brand.key)" (click)="toggleBrand(brand.key)"><span>{{ brand.name | uppercase }}</span><span class="brand-count">{{ brand.count }}<span class="check" aria-hidden="true">{{ selectedBrands.includes(brand.key) ? '✓' : '+' }}</span></span></button>
+      </div>
+      <p class="no-brands" *ngIf="!brands.length">Brands will appear as products are added to this collection.</p>
+    </div>
+  </details>
+  <div class="active-filters" *ngIf="selectedBrands.length || search">
+    <span class="active-label">YOUR SELECTION</span>
+    <ng-container *ngFor="let brand of brands"><button type="button" class="chip" *ngIf="selectedBrands.includes(brand.key)" (click)="toggleBrand(brand.key)" [attr.aria-label]="'Remove brand filter ' + brand.name">{{ brand.name | uppercase }} <span aria-hidden="true">×</span></button></ng-container>
+    <button type="button" class="clear" (click)="clear()">CLEAR ALL</button>
+  </div>
+  <div class="no-results" *ngIf="products.length && !visibleProducts.length"><span>NO MATCHES THIS TIME.</span><p>Try another brand or a different search.</p><button type="button" (click)="clear()">RESET SELECTION <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></button></div>
+</section>

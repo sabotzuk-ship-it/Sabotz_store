@@ -2,7 +2,8 @@
 <button class="menu-backdrop" [class.open]="open" type="button" aria-label="Close menu" (click)="open = false"></button>
 <nav id="site-menu" class="menu" [class.open]="open" aria-label="Main navigation">
   <a routerLink="/" (click)="open = false">HOME</a>
-  <a *ngFor="let category of settings.categories" [routerLink]="['/categories', category.id]" (click)="open = false">{{ category.title }} <span *ngIf="category.comingSoon">· EM BREVE</span></a>
-  <a href="https://www.instagram.com/sabotz.clothing/" rel="noopener noreferrer">INSTAGRAM</a>
+  <a routerLink="/collection" (click)="open = false">ALL PIECES</a>
+  <a *ngFor="let category of settings.categories" [routerLink]="['/categories', category.id]" (click)="open = false">{{ category.title }} <span *ngIf="category.comingSoon">· COMING SOON</span></a>
+  <app-social-links [stacked]="true" />
   <a class="admin-link" routerLink="/admin" (click)="open = false">ADMIN LOGIN</a>
 </nav>

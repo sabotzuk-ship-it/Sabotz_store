@@ -1,66 +1,66 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" routerLink="/">SABOTZ.</a>
-    <a routerLink="/shoes">Ver loja &#8599;</a>
+    <a routerLink="/shoes">View store <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
   </header>
 
   <section class="panel" *ngIf="!loggedIn">
     <h1>Admin login</h1>
-    <p class="muted">Entre com as credenciais de administrador para gerenciar os produtos da loja.</p>
+    <p class="muted">Sign in with your administrator credentials to manage the store.</p>
     <form (ngSubmit)="login()">
       <div class="grid">
-        <div><label for="email">Usuário</label><input id="email" name="username" [(ngModel)]="username" autocomplete="username" required></div>
-        <div><label for="password">Senha</label><input id="password" name="password" [(ngModel)]="password" type="password" autocomplete="current-password" required></div>
+        <div><label for="email">Username</label><input id="email" name="username" [(ngModel)]="username" autocomplete="username" required></div>
+        <div><label for="password">Password</label><input id="password" name="password" [(ngModel)]="password" type="password" autocomplete="current-password" required></div>
       </div>
       <div class="error">{{ loginError || loadError }}</div>
-      <button type="submit" [disabled]="busy">{{ busy ? 'Entrando...' : 'Entrar' }}</button>
+      <button type="submit" [disabled]="busy">{{ busy ? 'Signing in...' : 'Sign in' }}</button>
     </form>
   </section>
 
   <main *ngIf="loggedIn">
-    <div class="dashboard-heading"><div><h1>Painel administrativo</h1><p class="muted">Gerencie a loja e consulte os pedidos.</p></div><button class="secondary" type="button" (click)="logout()">Sair</button></div>
+    <div class="dashboard-heading"><div><h1>Store dashboard</h1><p class="muted">Manage the store and view customer orders.</p></div><button class="secondary" type="button" (click)="logout()">Sign out</button></div>
     <p class="error" *ngIf="loadError">{{ loadError }}</p>
 
-    <nav class="dashboard-tabs" aria-label="Seções administrativas">
-      <button type="button" [class.active]="activeSection === 'products'" (click)="activeSection = 'products'">Produtos</button>
-      <button type="button" [class.active]="activeSection === 'orders'" (click)="activeSection = 'orders'">Pedidos <span>{{ orders.length }}</span></button>
-      <button type="button" [class.active]="activeSection === 'settings'" (click)="activeSection = 'settings'">Configurações</button>
+    <nav class="dashboard-tabs" aria-label="Administration sections">
+      <button type="button" [class.active]="activeSection === 'products'" (click)="activeSection = 'products'">Products</button>
+      <button type="button" [class.active]="activeSection === 'orders'" (click)="activeSection = 'orders'">Orders <span>{{ orders.length }}</span></button>
+      <button type="button" [class.active]="activeSection === 'settings'" (click)="activeSection = 'settings'">Settings</button>
     </nav>
 
     <ng-container *ngIf="activeSection === 'products'">
     <div class="editor-layout">
       <section class="panel editor-panel">
-        <h2>{{ editingId ? 'Editar produto' : 'Adicionar produto' }}</h2>
+        <h2>{{ editingId ? 'Edit product' : 'Add product' }}</h2>
         <form (ngSubmit)="save()">
           <div class="grid">
-            <div><label for="name">Nome</label><input id="name" name="name" [(ngModel)]="form.name" required></div>
-            <div><label for="brand">Marca</label><input id="brand" name="brand" [(ngModel)]="form.brand" required></div>
+            <div><label for="name">Name</label><input id="name" name="name" [(ngModel)]="form.name" required></div>
+            <div><label for="brand">Brand</label><input id="brand" name="brand" [(ngModel)]="form.brand" required></div>
             <div><label for="status">Status</label><input id="status" name="status" [(ngModel)]="form.status" required></div>
-            <div><label for="category">Categoria</label><select id="category" name="category" [(ngModel)]="form.category"><option *ngFor="let category of settings.categories" [value]="category.name">{{ category.name }}</option></select></div>
-            <div><label for="price">Preço (€)</label><input id="price" name="price" type="number" min="0" step="0.01" [(ngModel)]="form.price" placeholder="0.00"></div>
-            <div class="wide"><label for="image-files">Fotos do produto</label><input id="image-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple (change)="selectImages($event)"><small>Use “Procurar” para escolher fotos. Para adicionar mais, abra novamente. JPG, PNG, WebP ou GIF; até 5 MB por foto.</small></div>
-            <div><label for="slug">Slug do produto</label><input id="slug" name="slug" [(ngModel)]="form.slug" placeholder="novo-tenis" pattern="[a-z0-9]+(-[a-z0-9]+)*" required></div>
+            <div><label for="category">Category</label><select id="category" name="category" [(ngModel)]="form.category"><option *ngFor="let category of settings.categories" [value]="category.name">{{ category.name }}</option></select></div>
+            <div><label for="price">Price (£)</label><input id="price" name="price" type="number" min="0" step="0.01" [(ngModel)]="form.price" placeholder="0.00"></div>
+            <div class="wide"><label for="image-files">Product photos</label><input id="image-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple (change)="selectImages($event)"><small>Choose product photos. Open the picker again to add more. JPG, PNG, WebP or GIF; up to 5 MB per photo.</small></div>
+            <div><label for="slug">Product slug</label><input id="slug" name="slug" [(ngModel)]="form.slug" placeholder="new-sneaker" pattern="[a-z0-9]+(-[a-z0-9]+)*" required></div>
           </div>
-          <div class="actions"><button type="submit" [disabled]="busy">{{ busy ? 'Salvando...' : (editingId ? 'Salvar alterações' : 'Adicionar produto') }}</button><button *ngIf="editingId" type="button" class="secondary" (click)="cancelEdit()">Cancelar edição</button></div>
+          <div class="actions"><button type="submit" [disabled]="busy">{{ busy ? 'Saving...' : (editingId ? 'Save changes' : 'Add product') }}</button><button *ngIf="editingId" type="button" class="secondary" (click)="cancelEdit()">Cancel editing</button></div>
         </form>
       </section>
 
       <aside class="panel preview-panel" aria-live="polite">
-        <div class="preview-heading"><h2>Preview do produto</h2><span>{{ editingId ? 'EDIÇÃO' : 'NOVO' }}</span></div>
+        <div class="preview-heading"><h2>Product preview</h2><span>{{ editingId ? 'EDITING' : 'NEW' }}</span></div>
         <div class="product-preview">
           <div class="preview-photo">
-            <img *ngIf="selectedPreview; else emptyPreview" [src]="selectedPreview" [alt]="form.name || 'Foto do produto'">
-            <ng-template #emptyPreview><div class="empty-preview"><strong>Sem foto selecionada</strong><span>Escolha uma imagem para ver o preview.</span></div></ng-template>
+            <img *ngIf="selectedPreview; else emptyPreview" [src]="selectedPreview" [alt]="form.name || 'Product photo'">
+            <ng-template #emptyPreview><div class="empty-preview"><strong>No photo selected</strong><span>Choose an image to see the preview.</span></div></ng-template>
           </div>
           <div class="preview-thumbnails" *ngIf="previewImages.length">
             <div class="preview-thumb" *ngFor="let photo of previewImages; let i = index">
-              <button type="button" class="thumb-select" [class.active]="selectedPreviewIndex === i" (click)="selectPreview(i)" [attr.aria-label]="'Preview da foto ' + (i + 1)"><img [src]="photo" alt=""></button>
-              <button type="button" class="remove-photo" (click)="removeImage(i)" [attr.aria-label]="'Excluir foto ' + (i + 1)">&times;</button>
+              <button type="button" class="thumb-select" [class.active]="selectedPreviewIndex === i" (click)="selectPreview(i)" [attr.aria-label]="'Preview photo ' + (i + 1)"><img [src]="photo" alt=""></button>
+              <button type="button" class="remove-photo" (click)="removeImage(i)" [attr.aria-label]="'Remove photo ' + (i + 1)">&times;</button>
             </div>
           </div>
           <div class="preview-details">
-            <div class="preview-brand">{{ form.brand || 'MARCA' }}</div>
-            <div class="preview-name">{{ form.name || 'Nome do produto' }}</div>
+            <div class="preview-brand">{{ form.brand || 'BRAND' }}</div>
+            <div class="preview-name">{{ form.name || 'Product name' }}</div>
             <div class="preview-price">{{ previewPrice }}</div>
             <span class="preview-status">{{ form.status || 'STATUS' }}</span>
             <div class="preview-category">{{ form.category }}</div>
@@ -70,24 +70,24 @@
     </div>
 
     <section class="panel">
-      <h2>Catálogo <span class="muted">({{ products.length }})</span></h2>
+      <h2>Catalogue <span class="muted">({{ products.length }})</span></h2>
       <div class="row" *ngFor="let product of products">
         <div><strong>{{ product.nome }}</strong><small>{{ product.marca }} &middot; {{ product.categoria }} &middot; {{ product.status }}<span *ngIf="product.preco !== undefined"> &middot; {{ formatPrice(product.preco) }}</span></small></div>
-        <div class="actions"><button type="button" class="secondary" [disabled]="busy" (click)="edit(product)">Editar</button><button type="button" class="danger" [disabled]="busy" (click)="remove(product)">Excluir</button></div>
+        <div class="actions"><button type="button" class="secondary" [disabled]="busy" (click)="edit(product)">Edit</button><button type="button" class="danger" [disabled]="busy" (click)="remove(product)">Delete</button></div>
       </div>
     </section>
     </ng-container>
 
     <section class="panel" *ngIf="activeSection === 'orders'">
-      <div class="orders-heading"><div><h2>Pedidos dos clientes</h2><p class="muted">Pedidos recebidos e armazenados pela loja.</p></div><button type="button" class="secondary" (click)="loadOrders()">Atualizar</button></div>
+      <div class="orders-heading"><div><h2>Customer orders</h2><p class="muted">Orders received and stored by the shop.</p></div><button type="button" class="secondary" (click)="loadOrders()">Refresh</button></div>
       <p class="error" *ngIf="ordersError">{{ ordersError }}</p>
       <div class="orders-empty" *ngIf="!orders.length">
-        <strong>Nenhum pedido registrado</strong>
-        <p>O catálogo ainda não tem checkout nem captura de pedidos. Quando a integração de vendas estiver configurada, os pedidos aparecerão aqui.</p>
+        <strong>No orders yet</strong>
+        <p>Checkout is not connected yet. Orders will appear here once a sales integration has been configured.</p>
       </div>
       <div class="orders-list" *ngIf="orders.length">
         <article class="order-card" *ngFor="let order of orders">
-          <div class="order-top"><div><strong>Pedido {{ order.id }}</strong><small>{{ formatOrderDate(order.createdAt) }}</small></div><span class="order-status">{{ order.status }}</span></div>
+          <div class="order-top"><div><strong>Order {{ order.id }}</strong><small>{{ formatOrderDate(order.createdAt) }}</small></div><span class="order-status">{{ order.status }}</span></div>
           <div class="order-customer"><strong>{{ order.customerName }}</strong><span *ngIf="order.email">{{ order.email }}</span><span *ngIf="order.phone">{{ order.phone }}</span></div>
           <ul><li *ngFor="let item of order.items">{{ item.quantity }} × {{ item.name }}<span *ngIf="item.unitPrice !== undefined">{{ formatPrice(item.unitPrice * item.quantity) }}</span></li></ul>
           <div class="order-total" *ngIf="order.total !== undefined">Total <strong>{{ formatPrice(order.total) }}</strong></div>
@@ -96,49 +96,49 @@
     </section>
 
     <section class="panel" *ngIf="activeSection === 'settings'">
-      <h2>Exibição das categorias</h2>
-      <p class="muted settings-description">Crie e remova abas da loja e controle o selo “EM BREVE”.</p>
+      <h2>Category display</h2>
+      <p class="muted settings-description">Add or remove store categories and manage the “COMING SOON” badge.</p>
       <p class="error" *ngIf="settingsError">{{ settingsError }}</p>
-      <p class="settings-success" *ngIf="settingsSaved">Configurações salvas. A página inicial já está atualizada.</p>
+      <p class="settings-success" *ngIf="settingsSaved">Settings saved. The home page is now updated.</p>
       <div class="category-setting" *ngFor="let category of settings.categories">
         <div class="category-fields">
-          <label>Título<input [name]="'categoryTitle-' + category.id" [(ngModel)]="category.title" maxlength="80" (input)="settingsSaved = false"></label>
-          <label>Descrição<input [name]="'categorySubtitle-' + category.id" [(ngModel)]="category.subtitle" maxlength="100" (input)="settingsSaved = false"></label>
-          <label>Capa
-            <img class="category-cover-preview" [src]="category.imagePreview || categoryImageUrl(category.image)" [alt]="'Capa ' + category.title">
+          <label>Title<input [name]="'categoryTitle-' + category.id" [(ngModel)]="category.title" maxlength="80" (input)="settingsSaved = false"></label>
+          <label>Description<input [name]="'categorySubtitle-' + category.id" [(ngModel)]="category.subtitle" maxlength="100" (input)="settingsSaved = false"></label>
+          <label>Cover
+            <img class="category-cover-preview" [src]="category.imagePreview || categoryImageUrl(category.image)" [alt]="'Cover ' + category.title">
             <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" [name]="'categoryImage-' + category.id" (change)="selectCategoryImage($event, category)">
           </label>
-          <small>Categoria de produtos: {{ category.name }} · {{ categoryProductCount(category) }} produto(s)</small>
+          <small>Product category: {{ category.name }} · {{ categoryProductCount(category) }} product(s)</small>
         </div>
         <div class="category-toggle">
-          <small>EM BREVE</small>
-          <label class="toggle"><input type="checkbox" [(ngModel)]="category.comingSoon" (change)="settingsSaved = false"><span></span><span class="sr-only">{{ categoryLabel(category) }} em breve</span></label>
+          <small>COMING SOON</small>
+          <label class="toggle"><input type="checkbox" [(ngModel)]="category.comingSoon" (change)="settingsSaved = false"><span></span><span class="sr-only">{{ categoryLabel(category) }} coming soon</span></label>
         </div>
         <div class="category-actions">
-          <button type="button" [disabled]="busy" (click)="saveSiteSettings()">Salvar</button>
-          <button class="danger remove-category" type="button" [title]="categoryHasProducts(category) ? 'Mova ou exclua os produtos desta categoria antes.' : 'Você precisará confirmar duas vezes.'" (click)="removeCategory(category)" aria-label="Excluir aba {{ category.title }}">Excluir</button>
+          <button type="button" [disabled]="busy" (click)="saveSiteSettings()">Save</button>
+          <button class="danger remove-category" type="button" [title]="categoryHasProducts(category) ? 'Move or delete products in this category first.' : 'Confirm removal, then save settings to apply.'" (click)="removeCategory(category)" aria-label="Remove category {{ category.title }}">Delete</button>
         </div>
       </div>
       <form class="new-category" (ngSubmit)="addCategory()">
-        <h3>Adicionar aba</h3>
+        <h3>Add category</h3>
         <div class="grid">
-          <div><label for="category-name">Nome da categoria</label><input id="category-name" name="categoryName" [(ngModel)]="newCategory.name" maxlength="60" placeholder="Bags" required></div>
-          <div><label for="category-subtitle">Descrição no cartão</label><input id="category-subtitle" name="categorySubtitle" [(ngModel)]="newCategory.subtitle" maxlength="100" placeholder="BAGS. WALLETS. MORE."></div>
-          <div class="new-category-image"><label for="category-image">Imagem de capa</label><input id="category-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" (change)="selectNewCategoryImage($event)"><small>JPG, PNG, WebP ou GIF; até 5 MB.</small><img *ngIf="newCategory.imagePreview" [src]="newCategory.imagePreview" alt="Prévia da capa da nova aba"></div>
-          <label class="new-category-coming"><input type="checkbox" name="newCategoryComingSoon" [(ngModel)]="newCategory.comingSoon"> Começar com “EM BREVE”</label>
+          <div><label for="category-name">Category name</label><input id="category-name" name="categoryName" [(ngModel)]="newCategory.name" maxlength="60" placeholder="Bags" required></div>
+          <div><label for="category-subtitle">Card description</label><input id="category-subtitle" name="categorySubtitle" [(ngModel)]="newCategory.subtitle" maxlength="100" placeholder="BAGS. WALLETS. MORE."></div>
+          <div class="new-category-image"><label for="category-image">Cover image</label><input id="category-image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" (change)="selectNewCategoryImage($event)"><small>JPG, PNG, WebP or GIF; up to 5 MB.</small><img *ngIf="newCategory.imagePreview" [src]="newCategory.imagePreview" alt="New category cover preview"></div>
+          <label class="new-category-coming"><input type="checkbox" name="newCategoryComingSoon" [(ngModel)]="newCategory.comingSoon"> Start with “COMING SOON”</label>
         </div>
-        <button type="submit">Adicionar aba</button>
+        <button type="submit">Add category</button>
       </form>
-      <div class="actions"><button type="button" [disabled]="busy" (click)="saveSiteSettings()">{{ busy ? 'Salvando...' : 'Salvar configurações' }}</button></div>
+      <div class="actions"><button type="button" [disabled]="busy" (click)="saveSiteSettings()">{{ busy ? 'Saving...' : 'Save settings' }}</button></div>
     </section>
 
     <div class="site-modal-backdrop" *ngIf="categoryPendingDelete as category" (click)="cancelCategoryDelete()">
       <section class="site-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-category-title" aria-describedby="delete-category-description" (click)="$event.stopPropagation()">
-        <h2 id="delete-category-title">Excluir aba {{ category.title }}?</h2>
-        <p id="delete-category-description">A aba será removida da página inicial. Para aplicar a alteração na loja, depois clique em “Salvar configurações”.</p>
+        <h2 id="delete-category-title">Remove category {{ category.title }}?</h2>
+        <p id="delete-category-description">This category will be removed from the home page. Click “Save settings” to apply this change to the store.</p>
         <div class="actions">
-          <button class="secondary" type="button" (click)="cancelCategoryDelete()">Cancelar</button>
-          <button class="danger" type="button" (click)="confirmCategoryDelete()">Sim, excluir aba</button>
+          <button class="secondary" type="button" (click)="cancelCategoryDelete()">Cancel</button>
+          <button class="danger" type="button" (click)="confirmCategoryDelete()">Yes, remove category</button>
         </div>
       </section>
     </div>

@@ -114,7 +114,7 @@ export class AdminPage implements OnInit, OnDestroy {
     const amount = this.form.price;
     return amount !== null && Number.isFinite(amount)
       ? this.productService.formatPrice(amount)
-      : 'Preço a definir';
+      : 'Price on request';
   }
 
   selectPreview(index: number): void {
@@ -143,7 +143,7 @@ export class AdminPage implements OnInit, OnDestroy {
 
   formatOrderDate(date: string): string {
     const parsed = new Date(date);
-    return Number.isNaN(parsed.getTime()) ? date : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(parsed);
+    return Number.isNaN(parsed.getTime()) ? date : new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' }).format(parsed);
   }
 
   categoryLabel(category: StoreCategory): string {
@@ -168,7 +168,7 @@ export class AdminPage implements OnInit, OnDestroy {
     input.value = '';
     if (!file) return;
     if (!this.isSupportedImage(file) || file.size > 5 * 1024 * 1024) {
-      this.settingsError = 'Escolha uma imagem JPG, PNG, WebP ou GIF de até 5 MB.';
+      this.settingsError = 'Choose a JPG, PNG, WebP or GIF image up to 5 MB.';
       return;
     }
     if (this.newCategory.imagePreview) URL.revokeObjectURL(this.newCategory.imagePreview);
@@ -183,7 +183,7 @@ export class AdminPage implements OnInit, OnDestroy {
     input.value = '';
     if (!file) return;
     if (!this.isSupportedImage(file) || file.size > 5 * 1024 * 1024) {
-      this.settingsError = 'Escolha uma imagem JPG, PNG, WebP ou GIF de até 5 MB.';
+      this.settingsError = 'Choose a JPG, PNG, WebP or GIF image up to 5 MB.';
       return;
     }
     if (category.imagePreview) URL.revokeObjectURL(category.imagePreview);
@@ -197,15 +197,15 @@ export class AdminPage implements OnInit, OnDestroy {
     const name = this.newCategory.name.trim();
     const slug = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     if (!name || !slug) {
-      this.settingsError = 'Digite um nome válido para a categoria.';
+      this.settingsError = 'Enter a valid category name.';
       return;
     }
     if (this.settings.categories.some(category => category.name.toLowerCase() === name.toLowerCase() || category.id === slug)) {
-      this.settingsError = 'Já existe uma categoria com esse nome.';
+      this.settingsError = 'A category with this name already exists.';
       return;
     }
     if (this.settings.categories.length >= 12) {
-      this.settingsError = 'O limite é de 12 categorias.';
+      this.settingsError = 'You can have up to 12 categories.';
       return;
     }
     const title = name.toUpperCase();
@@ -226,7 +226,7 @@ export class AdminPage implements OnInit, OnDestroy {
 
   removeCategory(category: StoreCategory): void {
     if (this.categoryHasProducts(category)) {
-      this.settingsError = `Mova ou exclua primeiro os produtos da categoria ${category.name}.`;
+      this.settingsError = `First move or delete the products in category ${category.name}.`;
       return;
     }
     this.categoryPendingDelete = category;
@@ -289,9 +289,9 @@ export class AdminPage implements OnInit, OnDestroy {
     const selected = accepted.slice(0, availableSlots);
 
     if (accepted.length !== incoming.length) {
-      this.loadError = 'Use arquivos JPG, PNG, WebP ou GIF de até 5 MB cada.';
+      this.loadError = 'Use JPG, PNG, WebP or GIF files up to 5 MB each.';
     } else if (selected.length !== incoming.length) {
-      this.loadError = 'Cada produto pode ter no máximo 20 fotos.';
+      this.loadError = 'Each product can have up to 20 photos.';
     } else {
       this.loadError = '';
     }
@@ -323,7 +323,7 @@ export class AdminPage implements OnInit, OnDestroy {
     this.loadError = '';
     try {
       if (!this.form.name.trim() || !this.form.brand.trim() || !this.form.slug.trim()) {
-        throw new Error('Preencha nome, marca e slug do produto.');
+        throw new Error('Enter the product name, brand and slug.');
       }
 
       if (this.imageFiles.length) {
@@ -332,7 +332,7 @@ export class AdminPage implements OnInit, OnDestroy {
         this.clearSelectedImages();
       }
 
-      if (!this.savedPhotos.length) throw new Error('Adicione pelo menos uma foto ao produto.');
+      if (!this.savedPhotos.length) throw new Error('Add at least one product photo.');
 
       const product: Product = {
         id: this.editingId,
@@ -355,7 +355,7 @@ export class AdminPage implements OnInit, OnDestroy {
   }
 
   async remove(product: Product): Promise<void> {
-    if (!window.confirm(`Excluir ${product.nome}?`)) return;
+    if (!window.confirm(`Delete ${product.nome}?`)) return;
     this.busy = true;
     this.loadError = '';
     try {

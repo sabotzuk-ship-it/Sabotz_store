@@ -1,7 +1,7 @@
 <div class="container" *ngIf="product as item; else unavailable">
   <header>
     <a class="logo" routerLink="/">SABOTZ.</a>
-    <a class="back" routerLink="/shoes">&#8592; BACK TO SHOES</a>
+    <a class="back" [routerLink]="backLink">&#8592; BACK TO {{ backLabel }}</a>
     <app-side-nav />
   </header>
   <main class="product-layout">
@@ -18,14 +18,10 @@
       <h1>{{ item.nome }}</h1>
       <p class="price" *ngIf="item.preco !== undefined">{{ formatPrice(item.preco) }}</p>
       <span class="status">{{ item.status }}</span>
-      <div class="contacts">
-        <a href="https://wa.me/447354186009" target="_blank" rel="noopener noreferrer">CONTACT SABOTZ ON WHATSAPP &#8599;</a>
-        <a href="https://www.instagram.com/sabotz.clothing/" target="_blank" rel="noopener noreferrer">CONTACT SABOTZ ON INSTAGRAM &#8599;</a>
-      </div>
+      <div class="contacts"><app-social-links /></div>
       <p class="description">{{ presentation.description }}</p>
-      <p class="note">Internal catalogue demonstration only.</p>
     </section>
   </main>
   <footer>SABOTZ CLOTHING &amp; SUPPLY</footer>
 </div>
-<ng-template #unavailable><div class="container"><header><a class="logo" routerLink="/">SABOTZ.</a><a class="back" routerLink="/shoes">&#8592; BACK TO SHOES</a></header><p class="note">{{ error || 'Loading product...' }}</p></div></ng-template>
+<ng-template #unavailable><div class="container"><header><a class="logo" routerLink="/">SABOTZ.</a><a class="back" routerLink="/collection">&#8592; BACK TO COLLECTION</a></header><p class="note">{{ error || 'Loading product...' }}</p></div></ng-template>

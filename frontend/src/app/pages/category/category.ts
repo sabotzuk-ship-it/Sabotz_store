@@ -1,3 +1,4 @@
+import { CatalogFilters } from '../../shared/catalog-filters/catalog-filters';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -10,7 +11,7 @@ import { SideNav } from '../../shared/side-nav/side-nav';
 @Component({
   selector: 'app-category-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, SideNav],
+  imports: [CommonModule, RouterLink, SideNav, CatalogFilters],
   templateUrl: './category.html',
   styleUrls: ['./category.css', '../shoes/shoes.css']
 })
@@ -48,8 +49,12 @@ export class CategoryPage implements OnInit {
     try {
       const [settings, products] = await Promise.all([this.siteSettings.getSettings(), this.productService.getProducts()]);
       this.settings = settings;
-      this.category = settings.categories.find(category => category.id === id);
-      this.products = products.filter(product => product.categoria === this.category?.name);
+      const allProducts = this.route.snapshot.data['allProducts'] === true;
+      this.category = allProducts
+        ? { id: 'collection', name: 'All pieces', title: 'ALL PIECES', subtitle: 'EXPLORE THE SABOTZ COLLECTION', image: 'shoes.jpg', comingSoon: false }
+        : settings.categories.find(category => category.id === id);
+      const availableCategories = new Set(settings.categories.filter(category => !category.comingSoon).map(category => category.name));
+      this.products = products.filter(product => allProducts ? availableCategories.has(product.categoria) : product.categoria === this.category?.name);
       if (!this.category) this.error = 'Category not found.';
     } catch {
       this.error = 'Could not load this category.';
