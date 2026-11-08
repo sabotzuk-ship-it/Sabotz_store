@@ -21,7 +21,7 @@ Requisitos: Node.js 22.22.3 ou mais recente e npm.
 
    Na primeira execução, o projeto cria `frontend/.env` com as credenciais locais de desenvolvimento: usuário `sabotz` e senha `admin`. O arquivo `.env` não é enviado ao Git. Essas credenciais padrão são somente para desenvolvimento local; defina credenciais fortes antes de qualquer implantação.
 
-4. Abra <http://localhost:4200>. Use o link **ADMIN** no rodapé ou acesse <http://localhost:4200/admin>.
+4. Abra <http://localhost:4200> para visitar a loja. Para gerenciar o catálogo e consultar **Visitor activity**, acesse <http://localhost:4200/admin> e entre com as credenciais do ADMIN.
 
 Encerre com `Ctrl+C`. Os produtos são gravados em `frontend/public/data/products.json`. O preço é informado em libras esterlinas (GBP, £). No painel, escolha imagens JPG, PNG, WebP ou GIF de até 5 MB; elas são pré-visualizadas e enviadas ao servidor ao salvar. As imagens ficam em `frontend/public/assets/images/uploads/`.
 
@@ -40,6 +40,10 @@ No navegador do telefone, abra `http://IP-DO-COMPUTADOR:4200`. Use `ipconfig` no
 `LATEST ARRIVALS` apresenta os quatro primeiros produtos do catálogo, na ordem da API (os novos cadastros entram no início). `SABOTZ SELECTION` começa com três produtos selecionados pelos slugs em `HomePage.selectedProducts`, em `frontend/src/app/pages/home/home.ts`. Produtos removidos e categorias marcadas como `COMING SOON` não aparecem nessas vitrines. `EXPLORE ALL` abre `/collection`, que reutiliza o catálogo e seus filtros. Textos fixos do site e do ADMIN estão em inglês; nomes e descrições cadastrados continuam sob controle do administrador.
 
 ## Produção
+
+A janela de boas-vindas oferece e-mail e cookies de análise opcionais. O painel **Visitor activity** mostra as entradas com e-mail e as visitas anônimas que aceitaram análise, com páginas abertas e tempo visível quando autorizado. Os registros ficam em `frontend/data/visitors.sqlite`, fora do Git. Em produção, defina `VISITOR_DB_PATH` para um arquivo em armazenamento persistente e privado.
+
+Para enviar **Welcome to SABOTZ**, configure `WELCOME_GMAIL_USER` e `WELCOME_GMAIL_APP_PASSWORD` no `frontend/.env` local ou nos segredos da hospedagem. Use uma senha de app criada na conta Google da loja e reinicie o servidor. O envio exige acesso SMTP ao Gmail. A entrada no catálogo funciona enquanto o envio estiver desativado.
 
 Crie as variáveis de ambiente `ADMIN_USERNAME`, `ADMIN_PASSWORD` e `SESSION_SECRET` (com pelo menos 32 caracteres aleatórios), defina `NODE_ENV=production`, gere a aplicação com `npm run build` e inicie o servidor com `npm run start:production`. O servidor entrega o frontend compilado e a API na mesma origem.
 

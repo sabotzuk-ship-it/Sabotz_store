@@ -1,0 +1,21 @@
+:host { display: block; overflow-wrap: anywhere; }
+header, .metric, summary { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+header { align-items: center; }
+h2, h3 { margin: 0 0 10px; }
+p, .metric span, summary span { color: #bbb; font-size: 13px; }
+button { background: #252525; color: #fff; border: 1px solid #505050; border-radius: 5px; padding: 10px 12px; cursor: pointer; }
+button[aria-pressed="true"] { background: #eee; color: #111; }
+.totals, .rankings { display: grid; gap: 14px; margin: 24px 0; }
+.totals { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.totals div, .rankings section, details { padding: 14px; background: #101010; border: 1px solid #383838; border-radius: 6px; }
+.totals strong, .totals span { display: block; }
+.totals strong { font-size: 25px; }
+.totals span { margin-top: 4px; color: #bbb; font-size: 12px; }
+.rankings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.sort { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.metric { padding: 9px 0; border-bottom: 1px solid #333; }
+.metric span:last-child { flex-shrink: 0; }
+details { margin-top: 10px; }
+summary { cursor: pointer; flex-wrap: wrap; }
+.error { color: #ff9292; }
+@media (max-width: 700px) { .rankings { grid-template-columns: 1fr; } .metric { flex-wrap: wrap; } }

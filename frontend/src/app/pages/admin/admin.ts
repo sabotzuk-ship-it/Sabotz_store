@@ -1,3 +1,4 @@
+import { StoreImage } from '../../shared/store-image/store-image';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,11 +9,12 @@ import { Product } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
 import { StoreCategory, SiteSettings, defaultSiteSettings } from '../../data/site-settings.model';
 import { SiteSettingsService } from '../../data/site-settings.service';
+import { VisitorReport } from './visitor-report/visitor-report';
 
 @Component({
   selector: 'app-admin-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [StoreImage, CommonModule, FormsModule, RouterLink, VisitorReport],
   templateUrl: './admin.html',
   styleUrl: './admin.css'
 })
@@ -34,12 +36,14 @@ export class AdminPage implements OnInit, OnDestroy {
     name: '', subtitle: '', image: 'accessories.jpg', comingSoon: true
   };
   products: Product[] = [];
+  catalogueCategory = '';
+  catalogueSearch = '';
   orders: CustomerOrder[] = [];
-  activeSection: 'products' | 'orders' | 'settings' = 'products';
-  savedPhotos: string[] = [];
-  imageFiles: File[] = [];
-  imagePreviews: string[] = [];
+  activeSection: 'products' | 'orders' | 'settings' | 'visitors' = 'products';
+  photos: { url: string; file?: File }[] = [];
   selectedPreviewIndex = 0;
+  private draggedPhotoIndex: number | null = null;
+  photoDropIndex: number | null = null;
   editingId = '';
   form = this.emptyForm();
 
@@ -100,14 +104,25 @@ export class AdminPage implements OnInit, OnDestroy {
     this.releaseCategoryPreviews();
   }
 
-  get previewImages(): string[] {
-    const savedPhotos = this.savedPhotos
-      .map(photo => /^https?:\/\//i.test(photo) || photo.startsWith('/') ? photo : `/${photo}`);
-    return [...savedPhotos, ...this.imagePreviews];
+  photoUrl(photo: string): string {
+    return /^https?:\/\//i.test(photo) || photo.startsWith('/') ? photo : `/${photo}`;
+  }
+
+  get catalogueProducts(): Product[] {
+    const search = this.catalogueSearch.trim().toLowerCase();
+    return this.products.filter(product =>
+      (!this.catalogueCategory || product.categoria === this.catalogueCategory) &&
+      (product.nome.toLowerCase().includes(search) || product.marca.toLowerCase().includes(search))
+    );
   }
 
   get selectedPreview(): string | undefined {
-    return this.previewImages[this.selectedPreviewIndex] ?? this.previewImages[0];
+    const photo = this.photos[this.selectedPreviewIndex];
+    return photo ? this.photoPreview(photo) : undefined;
+  }
+
+  photoPreview(photo: { url: string; file?: File }): string {
+    return photo.file ? photo.url : this.photoUrl(photo.url);
   }
 
   get previewPrice(): string {
@@ -122,19 +137,53 @@ export class AdminPage implements OnInit, OnDestroy {
   }
 
   removeImage(index: number): void {
+    if (this.busy || !this.photos[index]) return;
     const currentSelection = this.selectedPreviewIndex;
-    if (index < this.savedPhotos.length) {
-      this.savedPhotos.splice(index, 1);
-    } else {
-      const fileIndex = index - this.savedPhotos.length;
-      const preview = this.imagePreviews[fileIndex];
-      if (preview) URL.revokeObjectURL(preview);
-      this.imagePreviews.splice(fileIndex, 1);
-      this.imageFiles.splice(fileIndex, 1);
-    }
+    const [photo] = this.photos.splice(index, 1);
+    if (photo.file) URL.revokeObjectURL(photo.url);
     if (index < currentSelection) this.selectedPreviewIndex = currentSelection - 1;
-    else if (index === currentSelection) this.selectedPreviewIndex = Math.min(index, Math.max(0, this.previewImages.length - 1));
+    else if (index === currentSelection) this.selectedPreviewIndex = Math.min(index, Math.max(0, this.photos.length - 1));
     this.changeDetector.markForCheck();
+  }
+
+  moveSelectedPhoto(direction: -1 | 1): void {
+    this.movePhoto(this.selectedPreviewIndex, this.selectedPreviewIndex + direction);
+  }
+
+  startPhotoDrag(event: DragEvent, index: number): void {
+    if (this.busy || !event.dataTransfer) {
+      event.preventDefault();
+      return;
+    }
+    this.draggedPhotoIndex = index;
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', String(index));
+  }
+
+  dragOverPhoto(event: DragEvent, index: number): void {
+    if (this.busy || this.draggedPhotoIndex === null) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    this.photoDropIndex = index;
+  }
+
+  dropPhoto(event: DragEvent, index: number): void {
+    if (this.draggedPhotoIndex === null) return;
+    event.preventDefault();
+    this.movePhoto(this.draggedPhotoIndex, index);
+    this.endPhotoDrag();
+  }
+
+  endPhotoDrag(): void {
+    this.draggedPhotoIndex = null;
+    this.photoDropIndex = null;
+  }
+
+  private movePhoto(from: number, to: number): void {
+    if (this.busy || !this.photos[from] || !this.photos[to]) return;
+    const [photo] = this.photos.splice(from, 1);
+    this.photos.splice(to, 0, photo);
+    this.selectedPreviewIndex = to;
   }
 
   formatPrice(price?: number): string {
@@ -283,8 +332,8 @@ export class AdminPage implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     const incoming = Array.from(input.files ?? []);
     input.value = '';
-    const savedCount = this.savedPhotos.length;
-    const availableSlots = Math.max(0, 20 - savedCount - this.imageFiles.length);
+    if (this.busy) return;
+    const availableSlots = Math.max(0, 20 - this.photos.length);
     const accepted = incoming.filter(file => this.isSupportedImage(file) && file.size <= 5 * 1024 * 1024);
     const selected = accepted.slice(0, availableSlots);
 
@@ -296,9 +345,10 @@ export class AdminPage implements OnInit, OnDestroy {
       this.loadError = '';
     }
 
-    this.imageFiles = [...this.imageFiles, ...selected];
-    this.imagePreviews = [...this.imagePreviews, ...selected.map(file => URL.createObjectURL(file))];
-    this.selectedPreviewIndex = Math.max(0, this.previewImages.length - selected.length);
+    if (selected.length) {
+      this.selectedPreviewIndex = this.photos.length;
+      this.photos.push(...selected.map(file => ({ file, url: URL.createObjectURL(file) })));
+    }
     this.changeDetector.markForCheck();
   }
 
@@ -311,38 +361,42 @@ export class AdminPage implements OnInit, OnDestroy {
       brand: product.marca,
       status: product.status,
       category: product.categoria,
-      price: product.preco ?? null,
-      slug: this.productService.slugFor(product)
+      price: product.preco ?? null
     };
-    this.savedPhotos = [...product.fotos];
+    this.photos = product.fotos.map(url => ({ url }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   async save(): Promise<void> {
+    if (this.busy) return;
     this.busy = true;
     this.loadError = '';
     try {
-      if (!this.form.name.trim() || !this.form.brand.trim() || !this.form.slug.trim()) {
-        throw new Error('Enter the product name, brand and slug.');
+      if (!this.form.name.trim() || !this.form.brand.trim()) {
+        throw new Error('Enter the product name and brand.');
       }
 
-      if (this.imageFiles.length) {
-        const uploaded = await this.productService.uploadProductImages(this.imageFiles);
-        this.savedPhotos = [...this.savedPhotos, ...uploaded];
-        this.clearSelectedImages();
+      if (!this.photos.length) throw new Error('Add at least one product photo.');
+      const files = this.photos.flatMap(photo => photo.file ? [photo.file] : []);
+      if (files.length) {
+        const uploaded = await this.productService.uploadProductImages(files);
+        if (uploaded.length !== files.length) throw new Error('Some photos could not be uploaded. Please try again.');
+        let index = 0;
+        this.photos = this.photos.map(photo => {
+          if (!photo.file) return photo;
+          URL.revokeObjectURL(photo.url);
+          return { url: uploaded[index++] };
+        });
       }
 
-      if (!this.savedPhotos.length) throw new Error('Add at least one product photo.');
-
-      const product: Product = {
+      const product: Omit<Product, 'pagina'> = {
         id: this.editingId,
         nome: this.form.name.trim(),
         marca: this.form.brand.trim(),
         categoria: this.form.category,
         status: this.form.status.trim(),
         preco: this.form.price === null ? undefined : Number(this.form.price),
-        fotos: [...this.savedPhotos],
-        pagina: `products/${this.form.slug.trim().toLowerCase()}.html`
+        fotos: this.photos.map(photo => photo.url)
       };
       this.products = await this.productService.saveProduct(product, Boolean(this.editingId));
       this.cancelEdit();
@@ -370,7 +424,6 @@ export class AdminPage implements OnInit, OnDestroy {
 
   cancelEdit(): void {
     this.editingId = '';
-    this.savedPhotos = [];
     this.clearSelectedImages();
     this.form = this.emptyForm();
     this.selectedPreviewIndex = 0;
@@ -420,7 +473,7 @@ export class AdminPage implements OnInit, OnDestroy {
   }
 
   private emptyForm() {
-    return { name: '', brand: '', status: 'GALLERY PREVIEW', category: 'Shoes', price: null as number | null, slug: '' };
+    return { name: '', brand: '', status: 'GALLERY PREVIEW', category: 'Shoes', price: null as number | null };
   }
 
   private isSupportedImage(file: File): boolean {
@@ -428,12 +481,14 @@ export class AdminPage implements OnInit, OnDestroy {
   }
 
   private clearSelectedImages(): void {
+    this.endPhotoDrag();
     this.releaseImagePreviews();
-    this.imageFiles = [];
-    this.imagePreviews = [];
+    this.photos = [];
   }
 
   private releaseImagePreviews(): void {
-    this.imagePreviews.forEach(url => URL.revokeObjectURL(url));
+    for (const photo of this.photos) {
+      if (photo.file) URL.revokeObjectURL(photo.url);
+    }
   }
 }

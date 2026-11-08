@@ -5,5 +5,4 @@
   <a routerLink="/collection" (click)="open = false">ALL PIECES</a>
   <a *ngFor="let category of settings.categories" [routerLink]="['/categories', category.id]" (click)="open = false">{{ category.title }} <span *ngIf="category.comingSoon">· COMING SOON</span></a>
   <app-social-links [stacked]="true" />
-  <a class="admin-link" routerLink="/admin" (click)="open = false">ADMIN LOGIN</a>
 </nav>

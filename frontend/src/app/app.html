@@ -1,1 +1,41 @@
 <router-outlet />
+@if (access.isStore()) {
+  <div class="privacy-controls">
+    @if (access.state() && !access.state()?.entered) {
+      <button type="button" (click)="openWelcome()">Join SABOTZ</button>
+    }
+    <button type="button" (click)="openChoices()">Cookie choices</button>
+  </div>
+}
+
+<dialog #welcome class="entry-panel" aria-labelledby="entry-title" (cancel)="dismiss($event)">
+  <button type="button" class="entry-close" aria-label="Close welcome window" (click)="dismiss()">&times;</button>
+  <p class="entry-brand">SABOTZ.</p>
+  <h2 id="entry-title" tabindex="-1" autofocus>Welcome to SABOTZ.</h2>
+  @if (access.state(); as visitor) {
+    <p>Leave your email if you’d like to connect with us.</p>
+    <form #entryForm="ngForm" (ngSubmit)="enter()">
+      <label for="visitor-email">Email address</label>
+      <input id="visitor-email" name="email" type="email" email inputmode="email" autocomplete="email" [(ngModel)]="email" maxlength="254" required>
+      <p class="entry-note">@if (visitor.welcomeEnabled) { We’ll save your email and send a one-time welcome message. } @else { We’ll save your email if you choose to share it. }</p>
+      <button class="entry-button" type="submit" [disabled]="access.busy() || entryForm.invalid">{{ visitor.welcomeEnabled ? 'Get the welcome email' : 'Share my email' }}</button>
+    </form>
+  }
+  @if (access.error()) { <p role="alert" class="entry-error">{{ access.error() }}</p> }
+</dialog>
+
+@if (showCookieBanner()) {
+  <aside class="cookie-banner" aria-labelledby="cookie-title">
+    <h2 id="cookie-title">Cookie choices</h2>
+    <p class="entry-note">Optional analytics cookies help us understand which pages and products you open and how long they stay visible. If you shared your email, accepting links that activity to it.</p>
+    <details class="entry-note">
+      <summary>Read more about privacy</summary>
+      <p>Visitor records are kept for up to 90 days and are available in the private store dashboard. If you share your email, a session cookie remembers your entry. Rejecting optional cookies removes tracked activity for the current visit.</p>
+    </details>
+    <div class="cookie-actions">
+      <button type="button" (click)="acceptCookies()" [disabled]="access.busy()">Accept analytics cookies</button>
+      <button type="button" (click)="rejectCookies()" [disabled]="access.busy()">Reject optional cookies</button>
+    </div>
+    @if (access.error()) { <p role="alert" class="entry-error">{{ access.error() }}</p> }
+  </aside>
+}

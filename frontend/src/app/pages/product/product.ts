@@ -1,3 +1,4 @@
+import { StoreImage } from '../../shared/store-image/store-image';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -11,7 +12,7 @@ import { SocialLinks } from '../../shared/social-links/social-links';
 @Component({
   selector: 'app-product-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, SideNav, SocialLinks],
+  imports: [StoreImage, CommonModule, RouterLink, SideNav, SocialLinks],
   templateUrl: './product.html',
   styleUrl: './product.css'
 })

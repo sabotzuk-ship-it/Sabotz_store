@@ -6,10 +6,10 @@
   </header>
   <main class="product-layout">
     <section aria-label="Product photo gallery">
-      <img class="main-photo" [src]="'/' + selectedPhoto" [alt]="item.nome + ' - gallery photo'">
+      <img class="main-photo" [storeImage]="'/' + selectedPhoto" [storeImageWidth]="800" [storeImageDetail]="true" storeImageSizes="(max-width: 750px) 100vw, 640px" [alt]="item.nome + ' - gallery photo'">
       <div class="thumbnails">
         <button type="button" *ngFor="let photo of item.fotos; let i = index" [class.active]="selectedIndex === i" [attr.aria-label]="'View product photo ' + (i + 1)" (click)="selectedIndex = i">
-          <img [src]="'/' + photo" [alt]="'Product photo ' + (i + 1)" loading="lazy">
+          <img [storeImage]="'/' + photo" [storeImageWidth]="160" [alt]="'Product photo ' + (i + 1)" loading="lazy">
         </button>
       </div>
     </section>

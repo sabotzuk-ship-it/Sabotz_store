@@ -18,12 +18,13 @@
   </section>
 
   <main *ngIf="loggedIn">
-    <div class="dashboard-heading"><div><h1>Store dashboard</h1><p class="muted">Manage the store and view customer orders.</p></div><button class="secondary" type="button" (click)="logout()">Sign out</button></div>
+    <div class="dashboard-heading"><div><h1>Store dashboard</h1><p class="muted">Manage the store and view customer orders.</p></div><button class="secondary" type="button" [disabled]="busy" (click)="logout()">Sign out</button></div>
     <p class="error" *ngIf="loadError">{{ loadError }}</p>
 
     <nav class="dashboard-tabs" aria-label="Administration sections">
       <button type="button" [class.active]="activeSection === 'products'" (click)="activeSection = 'products'">Products</button>
       <button type="button" [class.active]="activeSection === 'orders'" (click)="activeSection = 'orders'">Orders <span>{{ orders.length }}</span></button>
+      <button type="button" [class.active]="activeSection === 'visitors'" (click)="activeSection = 'visitors'">Visitor activity</button>
       <button type="button" [class.active]="activeSection === 'settings'" (click)="activeSection = 'settings'">Settings</button>
     </nav>
 
@@ -38,10 +39,9 @@
             <div><label for="status">Status</label><input id="status" name="status" [(ngModel)]="form.status" required></div>
             <div><label for="category">Category</label><select id="category" name="category" [(ngModel)]="form.category"><option *ngFor="let category of settings.categories" [value]="category.name">{{ category.name }}</option></select></div>
             <div><label for="price">Price (£)</label><input id="price" name="price" type="number" min="0" step="0.01" [(ngModel)]="form.price" placeholder="0.00"></div>
-            <div class="wide"><label for="image-files">Product photos</label><input id="image-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple (change)="selectImages($event)"><small>Choose product photos. Open the picker again to add more. JPG, PNG, WebP or GIF; up to 5 MB per photo.</small></div>
-            <div><label for="slug">Product slug</label><input id="slug" name="slug" [(ngModel)]="form.slug" placeholder="new-sneaker" pattern="[a-z0-9]+(-[a-z0-9]+)*" required></div>
+            <div class="wide"><label for="image-files">Product photos</label><input id="image-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple [disabled]="busy" (change)="selectImages($event)"><small>Choose product photos. Open the picker again to add more. JPG, PNG, WebP or GIF; up to 5 MB per photo.</small></div>
           </div>
-          <div class="actions"><button type="submit" [disabled]="busy">{{ busy ? 'Saving...' : (editingId ? 'Save changes' : 'Add product') }}</button><button *ngIf="editingId" type="button" class="secondary" (click)="cancelEdit()">Cancel editing</button></div>
+          <div class="actions"><button type="submit" [disabled]="busy">{{ busy ? 'Saving...' : (editingId ? 'Save changes' : 'Add product') }}</button><button *ngIf="editingId" type="button" class="secondary" [disabled]="busy" (click)="cancelEdit()">Cancel editing</button></div>
         </form>
       </section>
 
@@ -52,10 +52,20 @@
             <img *ngIf="selectedPreview; else emptyPreview" [src]="selectedPreview" [alt]="form.name || 'Product photo'">
             <ng-template #emptyPreview><div class="empty-preview"><strong>No photo selected</strong><span>Choose an image to see the preview.</span></div></ng-template>
           </div>
-          <div class="preview-thumbnails" *ngIf="previewImages.length">
-            <div class="preview-thumb" *ngFor="let photo of previewImages; let i = index">
-              <button type="button" class="thumb-select" [class.active]="selectedPreviewIndex === i" (click)="selectPreview(i)" [attr.aria-label]="'Preview photo ' + (i + 1)"><img [src]="photo" alt=""></button>
-              <button type="button" class="remove-photo" (click)="removeImage(i)" [attr.aria-label]="'Remove photo ' + (i + 1)">&times;</button>
+          <div class="preview-thumbnails" *ngIf="photos.length">
+            <div class="preview-thumb" *ngFor="let photo of photos; let i = index" [draggable]="!busy && photos.length > 1"
+              (dragstart)="startPhotoDrag($event, i)" (dragover)="dragOverPhoto($event, i)"
+              (drop)="dropPhoto($event, i)" (dragend)="endPhotoDrag()">
+              <button type="button" class="thumb-select" [class.active]="selectedPreviewIndex === i || photoDropIndex === i" [attr.aria-pressed]="selectedPreviewIndex === i" (click)="selectPreview(i)" [attr.aria-label]="i === 0 ? 'Preview cover photo' : 'Preview photo ' + (i + 1)"><img [src]="photoPreview(photo)" alt="" draggable="false"></button>
+              <button type="button" class="remove-photo" [disabled]="busy" (click)="removeImage(i)" [attr.aria-label]="'Remove photo ' + (i + 1)">&times;</button>
+            </div>
+          </div>
+          <div class="preview-details" *ngIf="photos.length">
+            <small>Photo {{ selectedPreviewIndex + 1 }} of {{ photos.length }}{{ selectedPreviewIndex === 0 ? ' · Cover' : '' }}</small>
+            <p *ngIf="photos.length > 1"><small>Drag the thumbnails or use the move buttons to reorder.</small></p>
+            <div class="actions" *ngIf="photos.length > 1">
+              <button type="button" class="secondary" [disabled]="busy || selectedPreviewIndex === 0" (click)="moveSelectedPhoto(-1)">Move left</button>
+              <button type="button" class="secondary" [disabled]="busy || selectedPreviewIndex === photos.length - 1" (click)="moveSelectedPhoto(1)">Move right</button>
             </div>
           </div>
           <div class="preview-details">
@@ -70,13 +80,38 @@
     </div>
 
     <section class="panel">
-      <h2>Catalogue <span class="muted">({{ products.length }})</span></h2>
-      <div class="row" *ngFor="let product of products">
-        <div><strong>{{ product.nome }}</strong><small>{{ product.marca }} &middot; {{ product.categoria }} &middot; {{ product.status }}<span *ngIf="product.preco !== undefined"> &middot; {{ formatPrice(product.preco) }}</span></small></div>
-        <div class="actions"><button type="button" class="secondary" [disabled]="busy" (click)="edit(product)">Edit</button><button type="button" class="danger" [disabled]="busy" (click)="remove(product)">Delete</button></div>
+      <h2>Catalogue</h2>
+      <div class="grid catalogue-filters">
+        <div>
+          <label for="catalogue-category">Filter by category</label>
+          <select id="catalogue-category" [(ngModel)]="catalogueCategory">
+            <option value="">All categories</option>
+            <option *ngFor="let category of settings.categories" [value]="category.name">{{ category.name }}</option>
+          </select>
+        </div>
+        <div>
+          <label for="catalogue-search">Find a product</label>
+          <input id="catalogue-search" type="search" [(ngModel)]="catalogueSearch" placeholder="Search by name or brand">
+        </div>
       </div>
+      <ng-container *ngIf="catalogueProducts as results">
+        <p role="status"><small>{{ results.length }} of {{ products.length }} products</small></p>
+        <p class="muted" *ngIf="!results.length">{{ products.length ? 'No products match these filters.' : 'No products in the catalogue yet.' }}</p>
+        <div class="row" *ngFor="let product of results">
+          <div class="catalogue-item">
+            <div class="catalogue-photo">
+              <span aria-hidden="true">No photo</span>
+              <img *ngIf="product.fotos[0] as firstPhoto" #photo [storeImage]="photoUrl(firstPhoto)" [storeImageWidth]="160" [alt]="product.nome" loading="lazy" width="80" height="80" (error)="photo.hidden = true">
+            </div>
+            <div><strong>{{ product.nome }}</strong><small>{{ product.marca }} &middot; {{ product.categoria }} &middot; {{ product.status }}<span *ngIf="product.preco !== undefined"> &middot; {{ formatPrice(product.preco) }}</span></small></div>
+          </div>
+          <div class="actions"><button type="button" class="secondary" [disabled]="busy" (click)="edit(product)">Edit</button><button type="button" class="danger" [disabled]="busy" (click)="remove(product)">Delete</button></div>
+        </div>
+      </ng-container>
     </section>
     </ng-container>
+
+    <div class="panel" *ngIf="activeSection === 'visitors'"><app-visitor-report [products]="products" /></div>
 
     <section class="panel" *ngIf="activeSection === 'orders'">
       <div class="orders-heading"><div><h2>Customer orders</h2><p class="muted">Orders received and stored by the shop.</p></div><button type="button" class="secondary" (click)="loadOrders()">Refresh</button></div>

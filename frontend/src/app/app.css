@@ -1,0 +1,19 @@
+.entry-panel { box-sizing: border-box; width: min(calc(100% - 32px), 480px); max-height: calc(100dvh - 32px); margin: auto; padding: clamp(20px, 6vw, 32px); background: #161616; color: #f5f4f0; border: 1px solid #383838; border-radius: 10px; }
+.entry-panel::backdrop { background: #0008; }
+.entry-brand { margin: 0 44px 10px 0; font-size: 22px; font-weight: 900; letter-spacing: -1px; }
+.entry-panel h2 { margin: 0; font-size: clamp(22px, 6vw, 32px); line-height: 1.1; }
+.entry-close { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; color: #ddd; font-size: 22px; cursor: pointer; }
+.entry-panel p, .cookie-banner p { line-height: 1.55; }
+.entry-panel form > label { display: block; margin-top: 20px; }
+.entry-panel input[type=email] { box-sizing: border-box; width: 100%; min-height: 48px; margin-top: 8px; padding: 12px; font: inherit; background: #0c0c0c; color: white; border: 1px solid #666; border-radius: 4px; }
+.entry-note { font-size: 13px; color: #bbb; }
+.entry-button { width: 100%; min-height: 48px; margin-top: 24px; border: 0; border-radius: 4px; background: #f5f4f0; color: #111; font-weight: 700; cursor: pointer; }
+.entry-button:disabled { opacity: .65; }
+.cookie-banner { position: fixed; z-index: 20; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); box-sizing: border-box; width: min(calc(100% - 32px), 460px); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 18px; background: #161616; color: #f5f4f0; border: 1px solid #444; border-radius: 8px; box-shadow: 0 10px 32px #0008; }
+.cookie-banner h2 { margin: 0; font-size: 17px; }
+.cookie-banner summary { cursor: pointer; }
+.cookie-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.cookie-actions button { flex: 1 1 150px; min-height: 44px; padding: 8px; border: 1px solid #666; border-radius: 4px; background: #222; color: #fff; cursor: pointer; }
+.entry-error, .privacy-controls p { color: #ff9a9a; }
+.privacy-controls { background: #0c0c0c; color: #aaa; text-align: center; padding: 8px 16px 20px; }
+.privacy-controls button { min-height: 44px; border: 0; background: transparent; color: inherit; text-decoration: underline; cursor: pointer; }
