@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, Input, OnInit, signal } from '@angular/core';
 import { Product } from '../../../data/product.model';
 
+import { StoreCategory } from '../../../data/site-settings.model';
+import { StoreImage } from '../../../shared/store-image/store-image';
+
 interface PageStats {
   path: string;
   views: number;
@@ -25,12 +28,13 @@ interface VisitorReportData {
 @Component({
   selector: 'app-visitor-report',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, StoreImage],
   templateUrl: './visitor-report.html',
   styleUrl: './visitor-report.css'
 })
 export class VisitorReport implements OnInit {
   @Input() products: Product[] = [];
+  @Input() categories: StoreCategory[] = [];
   readonly report = signal<VisitorReportData | null>(null);
   readonly busy = signal(false);
   readonly error = signal('');
@@ -58,9 +62,17 @@ export class VisitorReport implements OnInit {
 
   pageLabel(path: string): string {
     if (path === '/') return 'Home';
-    if (!path.startsWith('/products/')) return path;
+    if (path === '/collection') return 'All pieces';
+    if (path.startsWith('/products/')) {
+      return this.productFor(path)?.nome ?? path.slice('/products/'.length);
+    }
+    const categoryId = path.replace(/^\/(?:categories\/)?/, '');
+    return this.categories.find(category => category.id === categoryId)?.name ?? path;
+  }
+
+  productFor(path: string): Product | undefined {
     const slug = path.slice('/products/'.length);
-    return this.products.find(product => product.pagina.replace(/^products\//, '').replace(/\.html$/, '') === slug)?.nome ?? slug;
+    return this.products.find(product => product.pagina.replace(/^products\//, '').replace(/\.html$/, '') === slug);
   }
 
   formatTime(seconds: number): string {

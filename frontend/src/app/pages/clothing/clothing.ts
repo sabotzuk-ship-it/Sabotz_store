@@ -1,3 +1,4 @@
+import { ProductPrice } from '../../shared/product-price/product-price';
 import { StoreImage } from '../../shared/store-image/store-image';
 import { CatalogFilters } from '../../shared/catalog-filters/catalog-filters';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
@@ -12,7 +13,7 @@ import { SideNav } from '../../shared/side-nav/side-nav';
 @Component({
   selector: 'app-clothing-page',
   standalone: true,
-  imports: [StoreImage, CommonModule, RouterLink, SideNav, CatalogFilters],
+  imports: [ProductPrice, StoreImage, CommonModule, RouterLink, SideNav, CatalogFilters],
   templateUrl: './clothing.html',
   styleUrls: ['./clothing.css', '../shoes/shoes.css']
 })
@@ -44,9 +45,6 @@ export class ClothingPage implements OnInit {
     return this.productService.slugFor(product);
   }
 
-  formatPrice(price?: number): string {
-    return this.productService.formatPrice(price);
-  }
 
   categoryImageUrl(image = ''): string {
     return image.startsWith('assets/') ? `/${image}` : `/assets/images/${image}`;

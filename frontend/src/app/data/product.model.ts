@@ -5,6 +5,7 @@ export interface Product {
   categoria: string;
   status: string;
   preco?: number;
+  discountPercent?: number;
   fotos: string[];
   pagina: string;
 }

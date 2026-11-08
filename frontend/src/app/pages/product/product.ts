@@ -1,3 +1,4 @@
+import { ProductPrice } from '../../shared/product-price/product-price';
 import { StoreImage } from '../../shared/store-image/store-image';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
@@ -12,7 +13,7 @@ import { SocialLinks } from '../../shared/social-links/social-links';
 @Component({
   selector: 'app-product-page',
   standalone: true,
-  imports: [StoreImage, CommonModule, RouterLink, SideNav, SocialLinks],
+  imports: [ProductPrice, StoreImage, CommonModule, RouterLink, SideNav, SocialLinks],
   templateUrl: './product.html',
   styleUrl: './product.css'
 })
@@ -39,9 +40,6 @@ export class ProductPage implements OnInit {
     return this.product?.fotos[this.selectedIndex] ?? '';
   }
 
-  formatPrice(price?: number): string {
-    return this.products.formatPrice(price);
-  }
 
   private async load(slug: string): Promise<void> {
     try {

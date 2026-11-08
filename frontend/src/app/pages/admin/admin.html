@@ -1,7 +1,7 @@
 <div class="wrap">
   <header class="top">
     <a class="logo" routerLink="/">SABOTZ.</a>
-    <a routerLink="/shoes">View store <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
+    <a class="view-store" routerLink="/shoes">View store <svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></a>
   </header>
 
   <section class="panel" *ngIf="!loggedIn">
@@ -22,10 +22,10 @@
     <p class="error" *ngIf="loadError">{{ loadError }}</p>
 
     <nav class="dashboard-tabs" aria-label="Administration sections">
-      <button type="button" [class.active]="activeSection === 'products'" (click)="activeSection = 'products'">Products</button>
-      <button type="button" [class.active]="activeSection === 'orders'" (click)="activeSection = 'orders'">Orders <span>{{ orders.length }}</span></button>
-      <button type="button" [class.active]="activeSection === 'visitors'" (click)="activeSection = 'visitors'">Visitor activity</button>
-      <button type="button" [class.active]="activeSection === 'settings'" (click)="activeSection = 'settings'">Settings</button>
+      <button type="button" [attr.aria-pressed]="activeSection === 'products'" (click)="activeSection = 'products'">Products</button>
+      <button type="button" [attr.aria-pressed]="activeSection === 'orders'" (click)="activeSection = 'orders'">Orders <span>{{ orders.length }}</span></button>
+      <button type="button" [attr.aria-pressed]="activeSection === 'visitors'" (click)="activeSection = 'visitors'">Visitor activity</button>
+      <button type="button" [attr.aria-pressed]="activeSection === 'settings'" (click)="activeSection = 'settings'">Settings</button>
     </nav>
 
     <ng-container *ngIf="activeSection === 'products'">
@@ -39,6 +39,7 @@
             <div><label for="status">Status</label><input id="status" name="status" [(ngModel)]="form.status" required></div>
             <div><label for="category">Category</label><select id="category" name="category" [(ngModel)]="form.category"><option *ngFor="let category of settings.categories" [value]="category.name">{{ category.name }}</option></select></div>
             <div><label for="price">Price (£)</label><input id="price" name="price" type="number" min="0" step="0.01" [(ngModel)]="form.price" placeholder="0.00"></div>
+            <div><label for="discountPercent">Discount (%)</label><input id="discountPercent" name="discountPercent" type="number" min="1" max="100" step="1" [(ngModel)]="form.discountPercent" placeholder="Optional" aria-describedby="discount-help"><small id="discount-help">Leave blank for the regular price.</small></div>
             <div class="wide"><label for="image-files">Product photos</label><input id="image-files" type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple [disabled]="busy" (change)="selectImages($event)"><small>Choose product photos. Open the picker again to add more. JPG, PNG, WebP or GIF; up to 5 MB per photo.</small></div>
           </div>
           <div class="actions"><button type="submit" [disabled]="busy">{{ busy ? 'Saving...' : (editingId ? 'Save changes' : 'Add product') }}</button><button *ngIf="editingId" type="button" class="secondary" [disabled]="busy" (click)="cancelEdit()">Cancel editing</button></div>
@@ -71,7 +72,7 @@
           <div class="preview-details">
             <div class="preview-brand">{{ form.brand || 'BRAND' }}</div>
             <div class="preview-name">{{ form.name || 'Product name' }}</div>
-            <div class="preview-price">{{ previewPrice }}</div>
+            <div class="preview-price"><app-product-price [price]="form.price" [discount]="form.discountPercent" fallback="Price on request"></app-product-price></div>
             <span class="preview-status">{{ form.status || 'STATUS' }}</span>
             <div class="preview-category">{{ form.category }}</div>
           </div>
@@ -103,7 +104,7 @@
               <span aria-hidden="true">No photo</span>
               <img *ngIf="product.fotos[0] as firstPhoto" #photo [storeImage]="photoUrl(firstPhoto)" [storeImageWidth]="160" [alt]="product.nome" loading="lazy" width="80" height="80" (error)="photo.hidden = true">
             </div>
-            <div><strong>{{ product.nome }}</strong><small>{{ product.marca }} &middot; {{ product.categoria }} &middot; {{ product.status }}<span *ngIf="product.preco !== undefined"> &middot; {{ formatPrice(product.preco) }}</span></small></div>
+            <div><strong>{{ product.nome }}</strong><small>{{ product.marca }} &middot; {{ product.categoria }} &middot; {{ product.status }}<span *ngIf="product.preco !== undefined"> &middot; <app-product-price [price]="product.preco" [discount]="product.discountPercent"></app-product-price></span></small></div>
           </div>
           <div class="actions"><button type="button" class="secondary" [disabled]="busy" (click)="edit(product)">Edit</button><button type="button" class="danger" [disabled]="busy" (click)="remove(product)">Delete</button></div>
         </div>
@@ -111,7 +112,7 @@
     </section>
     </ng-container>
 
-    <div class="panel" *ngIf="activeSection === 'visitors'"><app-visitor-report [products]="products" /></div>
+    <app-visitor-report *ngIf="activeSection === 'visitors'" [products]="products" [categories]="settings.categories" />
 
     <section class="panel" *ngIf="activeSection === 'orders'">
       <div class="orders-heading"><div><h2>Customer orders</h2><p class="muted">Orders received and stored by the shop.</p></div><button type="button" class="secondary" (click)="loadOrders()">Refresh</button></div>

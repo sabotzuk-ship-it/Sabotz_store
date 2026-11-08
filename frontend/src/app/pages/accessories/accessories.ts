@@ -1,3 +1,4 @@
+import { ProductPrice } from '../../shared/product-price/product-price';
 import { StoreImage } from '../../shared/store-image/store-image';
 import { CatalogFilters } from '../../shared/catalog-filters/catalog-filters';
 import { CommonModule } from '@angular/common';
@@ -10,7 +11,7 @@ import { SideNav } from '../../shared/side-nav/side-nav';
 @Component({
   selector: 'app-accessories-page',
   standalone: true,
-  imports: [StoreImage, CommonModule, RouterLink, SideNav, CatalogFilters],
+  imports: [ProductPrice, StoreImage, CommonModule, RouterLink, SideNav, CatalogFilters],
   templateUrl: './accessories.html',
   styleUrl: '../shoes/shoes.css'
 })
@@ -37,7 +38,4 @@ export class AccessoriesPage implements OnInit {
     return this.productService.slugFor(product);
   }
 
-  formatPrice(price?: number): string {
-    return this.productService.formatPrice(price);
-  }
 }

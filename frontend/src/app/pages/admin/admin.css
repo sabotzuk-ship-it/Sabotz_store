@@ -54,3 +54,20 @@ button.danger { background: #6e2424; color: white; }
 .error { color: #ff9292; min-height: 20px; margin: 10px 0; }
 @media (max-width: 850px) { .editor-layout { grid-template-columns: 1fr; } .preview-panel { position: static; } }
 @media (max-width: 650px) { .grid { grid-template-columns: 1fr; } .row { align-items: flex-start; flex-direction: column; } .wide { grid-column: auto; } }
+
+.top { padding-bottom: 16px; border-bottom: 1px solid #303030; margin-bottom: 24px; }
+.view-store { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 12px; border: 1px solid #3d3d3d; border-radius: 7px; text-decoration: none; font-size: 13px; }
+.view-store .icon-arrow { width: 14px; height: 14px; }
+.dashboard-heading { margin-bottom: 20px; }
+.dashboard-heading p { margin: 0; }
+.dashboard-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px; margin-bottom: 24px; border: 1px solid #303030; border-radius: 10px; background: #141414; }
+.dashboard-tabs button { flex: 1 1 auto; min-height: 44px; background: transparent; color: #bbb; }
+.dashboard-tabs button[aria-pressed="true"] { background: #f0e9dd; color: #161410; }
+.dashboard-tabs button span { margin-left: 3px; opacity: .8; }
+@media (hover: hover) {
+  .view-store:hover, .dashboard-tabs button[aria-pressed="false"]:hover { background: #242424; color: #fff; }
+}
+@media (max-width: 540px) {
+  .dashboard-heading h1 { font-size: 25px; }
+  .dashboard-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
