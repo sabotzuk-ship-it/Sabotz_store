@@ -6,7 +6,7 @@
   <main>
     <section class="categories" aria-label="Explore the collections">
       <a *ngFor="let category of settings.categories" [routerLink]="['/categories', category.id]" class="category">
-        <img [storeImage]="categoryImageUrl(category.image)" storeImageSizes="(max-width: 600px) 100vw, 350px" [alt]="'Explore ' + category.title" width="640" height="900">
+        <img [storeImage]="categoryImageUrl(category.image)" [storeImageSizes]="category.image === 'shoes.jpg' ? shoesCoverSizes : categoryCoverSizes" [alt]="'Explore ' + category.title" width="640" height="900">
         <span class="coming-soon-badge" *ngIf="category.comingSoon">COMING SOON</span>
         <div class="category-content"><div><h2>{{ category.title }}</h2><p>{{ category.subtitle }}</p></div><span class="arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></span></div>
       </a>

@@ -1,3 +1,4 @@
+import { ProductPrice } from '../../shared/product-price/product-price';
 import { StoreImage } from '../../shared/store-image/store-image';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
@@ -14,7 +15,7 @@ import { VisitorReport } from './visitor-report/visitor-report';
 @Component({
   selector: 'app-admin-page',
   standalone: true,
-  imports: [StoreImage, CommonModule, FormsModule, RouterLink, VisitorReport],
+  imports: [ProductPrice, StoreImage, CommonModule, FormsModule, RouterLink, VisitorReport],
   templateUrl: './admin.html',
   styleUrl: './admin.css'
 })
@@ -123,13 +124,6 @@ export class AdminPage implements OnInit, OnDestroy {
 
   photoPreview(photo: { url: string; file?: File }): string {
     return photo.file ? photo.url : this.photoUrl(photo.url);
-  }
-
-  get previewPrice(): string {
-    const amount = this.form.price;
-    return amount !== null && Number.isFinite(amount)
-      ? this.productService.formatPrice(amount)
-      : 'Price on request';
   }
 
   selectPreview(index: number): void {
@@ -361,7 +355,8 @@ export class AdminPage implements OnInit, OnDestroy {
       brand: product.marca,
       status: product.status,
       category: product.categoria,
-      price: product.preco ?? null
+      price: product.preco ?? null,
+      discountPercent: product.discountPercent ?? null
     };
     this.photos = product.fotos.map(url => ({ url }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -374,6 +369,11 @@ export class AdminPage implements OnInit, OnDestroy {
     try {
       if (!this.form.name.trim() || !this.form.brand.trim()) {
         throw new Error('Enter the product name and brand.');
+      }
+
+      const { price, discountPercent } = this.form;
+      if (discountPercent !== null && (!Number.isInteger(discountPercent) || discountPercent < 1 || discountPercent > 100 || price === null || price <= 0)) {
+        throw new Error('Set a price above £0 and enter a whole discount from 1 to 100.');
       }
 
       if (!this.photos.length) throw new Error('Add at least one product photo.');
@@ -395,7 +395,8 @@ export class AdminPage implements OnInit, OnDestroy {
         marca: this.form.brand.trim(),
         categoria: this.form.category,
         status: this.form.status.trim(),
-        preco: this.form.price === null ? undefined : Number(this.form.price),
+        preco: price ?? undefined,
+        discountPercent: discountPercent ?? undefined,
         fotos: this.photos.map(photo => photo.url)
       };
       this.products = await this.productService.saveProduct(product, Boolean(this.editingId));
@@ -473,7 +474,7 @@ export class AdminPage implements OnInit, OnDestroy {
   }
 
   private emptyForm() {
-    return { name: '', brand: '', status: 'GALLERY PREVIEW', category: 'Shoes', price: null as number | null };
+    return { name: '', brand: '', status: 'GALLERY PREVIEW', category: 'Shoes', price: null as number | null, discountPercent: null as number | null };
   }
 
   private isSupportedImage(file: File): boolean {

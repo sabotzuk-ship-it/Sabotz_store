@@ -176,7 +176,7 @@ export function registerVisitorAnalytics(app, { databasePath, requireAdmin }) {
       FROM page_visits WHERE path LIKE '/products/%' GROUP BY path
       ORDER BY averageSeconds DESC, views DESC, path LIMIT 30`).all();
     const journey = db.prepare(`SELECT path, opened_at AS openedAt, seconds FROM page_visits
-      WHERE visitor_id = ? ORDER BY opened_at DESC, rowid DESC LIMIT 30`);
+      WHERE visitor_id = ? AND path LIKE '/products/%' ORDER BY opened_at DESC, rowid DESC LIMIT 30`);
     const recent = db.prepare(`SELECT id, email, entered_at AS enteredAt, tracking FROM visitor_entries
       ORDER BY entered_at DESC LIMIT 30`).all().map(entry => ({
       ...entry, tracking: Boolean(entry.tracking), journey: journey.all(entry.id).reverse()

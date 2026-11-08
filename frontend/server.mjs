@@ -95,6 +95,7 @@ function validateProduct(body, allowedCategories) {
   const status = typeof body?.status === 'string' ? body.status.trim() : '';
   const categoria = typeof body?.categoria === 'string' ? body.categoria : '';
   const preco = body?.preco;
+  const discountPercent = body?.discountPercent;
   const pagina = typeof body?.pagina === 'string' ? body.pagina.trim() : '';
   const fotos = Array.isArray(body?.fotos) ? body.fotos : [];
 
@@ -103,6 +104,9 @@ function validateProduct(body, allowedCategories) {
   if (!status || status.length > 60) return 'Status is required (maximum 60 characters).';
   if (!allowedCategories.has(categoria)) return 'Choose a valid product category.';
   if (preco !== undefined && (typeof preco !== 'number' || !Number.isFinite(preco) || preco < 0 || preco > 10000000)) return 'Enter a valid non-negative product price.';
+  if (discountPercent !== undefined && (!Number.isInteger(discountPercent) || discountPercent < 1 || discountPercent > 100 || !(preco > 0))) {
+    return 'Set a price above £0 and enter a whole discount from 1 to 100.';
+  }
   if (body?.pagina !== undefined && !/^(?:products\/)?[a-z0-9]+(?:-[a-z0-9]+)*(?:\.html)?$/.test(pagina)) return 'Use a lowercase product slug, for example products/new-shoe.html.';
   if (!fotos.length || fotos.length > 20) return 'Add between 1 and 20 product images.';
   if (fotos.some(photo => typeof photo !== 'string' || !/^assets\/images\/[a-zA-Z0-9._/-]+$/.test(photo) || photo.split('/').includes('..'))) {

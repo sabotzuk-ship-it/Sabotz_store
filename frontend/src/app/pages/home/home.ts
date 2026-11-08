@@ -25,6 +25,9 @@ export class HomePage implements OnInit {
   productsLoading = true;
   productsError = '';
   readonly year = new Date().getFullYear();
+  readonly categoryCoverSizes = '(max-width: 600px) calc(100vw - 36px), 350px';
+  // The 3:2 shoes photo is scaled to cover the card height before its sides are cropped.
+  readonly shoesCoverSizes = '(max-width: 600px) max(510px, calc(100vw - 36px)), (max-width: 849px) 540px, 720px';
 
   constructor(
     private readonly siteSettings: SiteSettingsService,

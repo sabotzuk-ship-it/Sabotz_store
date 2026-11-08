@@ -16,7 +16,7 @@
     <section>
       <div class="category">{{ presentation.collection }}</div>
       <h1>{{ item.nome }}</h1>
-      <p class="price" *ngIf="item.preco !== undefined">{{ formatPrice(item.preco) }}</p>
+      <p class="price" *ngIf="item.preco !== undefined"><app-product-price [price]="item.preco" [discount]="item.discountPercent"></app-product-price></p>
       <span class="status">{{ item.status }}</span>
       <div class="contacts"><app-social-links /></div>
       <p class="description">{{ presentation.description }}</p>

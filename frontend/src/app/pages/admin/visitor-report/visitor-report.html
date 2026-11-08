@@ -1,42 +1,91 @@
-<section aria-labelledby="visitor-report-title">
-  <header>
-    <div><h2 id="visitor-report-title">Visitor activity</h2><p>Last 90 days · Time reflects pages visible in the browser.</p></div>
+<section aria-labelledby="visitor-report-title" [attr.aria-busy]="busy()">
+  <header class="report-header">
+    <div>
+      <span class="eyebrow">Analytics · Last 90 days</span>
+      <h2 id="visitor-report-title">Visitor activity</h2>
+      <p>Average time counts only while a page is visible.</p>
+    </div>
     <button type="button" (click)="load()" [disabled]="busy()">{{ busy() ? 'Loading…' : 'Refresh' }}</button>
   </header>
+
   @if (error()) { <p class="error" role="alert">{{ error() }}</p> }
   @if (report(); as data) {
-    <div class="totals">
-      <div><strong>{{ data.totals.entries }}</strong><span>Entries</span></div>
-      <div><strong>{{ data.totals.emails }}</strong><span>Unique emails</span></div>
-      <div><strong>{{ data.totals.tracked }}</strong><span>Visits sharing activity</span></div>
-    </div>
+    <dl class="totals">
+      <div><dt>Visitor entries</dt><dd>{{ data.totals.entries }}</dd></div>
+      <div><dt>Unique emails</dt><dd>{{ data.totals.emails }}</dd></div>
+      <div><dt>Visits sharing activity</dt><dd>{{ data.totals.tracked }}</dd></div>
+    </dl>
+
     <div class="rankings">
-      <section aria-labelledby="product-activity-title">
-        <h3 id="product-activity-title">Product activity</h3>
-        <div class="sort" role="group" aria-label="Sort products">
-          <button type="button" [attr.aria-pressed]="order() === 'views'" (click)="order.set('views')">Most opened</button>
-          <button type="button" [attr.aria-pressed]="order() === 'time'" (click)="order.set('time')">Longest average time</button>
-        </div>
-        @for (product of rankedProducts(); track product.path) {
-          <div class="metric"><strong>{{ pageLabel(product.path) }}</strong><span>{{ product.views }} opens · {{ formatTime(product.averageSeconds) }} avg</span></div>
-        } @empty { <p>No product activity yet.</p> }
+      <section class="report-card" aria-labelledby="product-activity-title">
+        <header class="ranking-header">
+          <h3 id="product-activity-title">Product activity</h3>
+          <div class="sort" role="group" aria-label="Sort products">
+            <button type="button" [attr.aria-pressed]="order() === 'views'" (click)="order.set('views')">Most opened</button>
+            <button type="button" [attr.aria-pressed]="order() === 'time'" (click)="order.set('time')">Longest average time</button>
+          </div>
+        </header>
+        <ng-container *ngTemplateOutlet="ranking; context: { $implicit: rankedProducts(), isProduct: true }" />
       </section>
-      <section aria-labelledby="page-activity-title">
-        <h3 id="page-activity-title">Most visited pages</h3>
-        @for (page of data.pages; track page.path) {
-          <div class="metric"><strong>{{ pageLabel(page.path) }}</strong><span>{{ page.views }} views · {{ formatTime(page.averageSeconds) }} avg</span></div>
-        } @empty { <p>No page activity yet.</p> }
+
+      <section class="report-card" aria-labelledby="page-activity-title">
+        <header class="ranking-header"><h3 id="page-activity-title">Most visited pages</h3></header>
+        <ng-container *ngTemplateOutlet="ranking; context: { $implicit: data.pages, isProduct: false }" />
       </section>
     </div>
-    <h3>Recent entries</h3>
-    <p>Entries include visitors who provided an email or accepted analytics cookies. Open an entry to see the activity shared during that visit.</p>
-    @for (visitor of data.recent; track visitor.id) {
-      <details>
-        <summary><strong>{{ visitor.email || 'Anonymous visit' }}</strong><span>{{ visitor.enteredAt | date:'medium' }} · {{ visitor.tracking ? 'Activity shared' : 'Activity not shared' }}</span></summary>
-        @for (page of visitor.journey; track $index) {
-          <div class="metric"><span>{{ pageLabel(page.path) }}</span><span>{{ page.openedAt | date:'shortTime' }} · {{ formatTime(page.seconds) }}</span></div>
-        } @empty { <p>No page activity for this entry.</p> }
-      </details>
-    } @empty { <p>No visitors have entered yet.</p> }
+
+    <section class="report-card recent" aria-labelledby="recent-visits-title">
+      <h3 id="recent-visits-title">Recent entries</h3>
+      <p>Open an entry to see which products the visitor viewed.</p>
+      @for (visitor of data.recent; track visitor.id) {
+        <details>
+          <summary>
+            <strong>{{ visitor.email || 'Anonymous visit' }}</strong>
+            <time>{{ visitor.enteredAt | date:'medium' }}</time>
+            <span class="activity-badge" [class.shared]="visitor.tracking">{{ visitor.tracking ? 'Activity shared' : 'Activity not shared' }}</span>
+          </summary>
+          @for (product of visitor.journey; track $index) {
+            <div class="journey-row">
+              <div class="rank-name">
+                @if (productFor(product.path)?.fotos?.[0]; as photo) {
+                  <img [storeImage]="'/' + photo" alt="" loading="lazy" width="36" height="36">
+                }
+                <strong>{{ pageLabel(product.path) }}</strong>
+              </div>
+              <span>{{ formatTime(product.seconds) }} viewed</span>
+            </div>
+          } @empty { <p class="empty">No product views recorded.</p> }
+        </details>
+      } @empty { <p class="empty">No visitors have entered yet.</p> }
+    </section>
   }
 </section>
+
+<ng-template #ranking let-rows let-isProduct="isProduct">
+  @if (rows.length) {
+    <table>
+      <thead><tr><th scope="col">{{ isProduct ? 'Product' : 'Page' }}</th><th scope="col">{{ isProduct ? 'Opens' : 'Views' }}</th><th scope="col">Avg. time</th></tr></thead>
+      <tbody>
+        @for (row of rows; track row.path) {
+          <tr>
+            <th scope="row">
+              <span class="rank-name">
+                <span class="rank">{{ $index + 1 }}</span>
+                @if (isProduct) {
+                  @if (productFor(row.path)?.fotos?.[0]; as photo) {
+                    <img [storeImage]="'/' + photo" [storeImageWidth]="480" alt="" loading="lazy" width="36" height="36">
+                  }
+                }
+                <span>{{ pageLabel(row.path) }}</span>
+              </span>
+            </th>
+            <td>{{ row.views }}</td>
+            <td>{{ formatTime(row.averageSeconds) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p class="empty">{{ isProduct ? 'No product activity yet.' : 'No page activity yet.' }}</p>
+  }
+</ng-template>

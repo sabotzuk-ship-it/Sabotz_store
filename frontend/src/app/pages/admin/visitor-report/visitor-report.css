@@ -1,21 +1,42 @@
 :host { display: block; overflow-wrap: anywhere; }
-header, .metric, summary { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-header { align-items: center; }
-h2, h3 { margin: 0 0 10px; }
-p, .metric span, summary span { color: #bbb; font-size: 13px; }
-button { background: #252525; color: #fff; border: 1px solid #505050; border-radius: 5px; padding: 10px 12px; cursor: pointer; }
-button[aria-pressed="true"] { background: #eee; color: #111; }
-.totals, .rankings { display: grid; gap: 14px; margin: 24px 0; }
+.report-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
+.eyebrow { color: #b9a98d; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+h2 { margin: 7px 0; font-size: clamp(24px, 4vw, 34px); letter-spacing: -.035em; }
+h3 { margin: 0; font-size: 17px; }
+p { margin: 6px 0 0; color: #aaa; font-size: 13px; line-height: 1.5; }
+button { padding: 9px 12px; min-height: 40px; border: 1px solid #454545; border-radius: 7px; background: #222; color: #eee; cursor: pointer; }
+button[aria-pressed="true"] { border-color: #f0e9dd; background: #f0e9dd; color: #161410; }
+button:disabled { opacity: .6; cursor: wait; }
+.totals, .rankings { display: grid; gap: 14px; margin: 0 0 18px; }
 .totals { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.totals div, .rankings section, details { padding: 14px; background: #101010; border: 1px solid #383838; border-radius: 6px; }
-.totals strong, .totals span { display: block; }
-.totals strong { font-size: 25px; }
-.totals span { margin-top: 4px; color: #bbb; font-size: 12px; }
-.rankings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.sort { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-.metric { padding: 9px 0; border-bottom: 1px solid #333; }
-.metric span:last-child { flex-shrink: 0; }
-details { margin-top: 10px; }
-summary { cursor: pointer; flex-wrap: wrap; }
-.error { color: #ff9292; }
-@media (max-width: 700px) { .rankings { grid-template-columns: 1fr; } .metric { flex-wrap: wrap; } }
+.totals div, .report-card { min-width: 0; border: 1px solid #363636; border-radius: 12px; background: #111; }
+.totals div { padding: clamp(10px, 2vw, 18px); background: linear-gradient(145deg, #24211c, #151515 72%); }
+dt { color: #d2c9bb; font-size: 12px; line-height: 1.4; }
+dd { margin: 6px 0 0; font-size: clamp(24px, 4vw, 39px); font-weight: 700; font-variant-numeric: tabular-nums; }
+.rankings { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.ranking-header, .recent { padding: 16px; }
+.sort { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+table { width: 100%; table-layout: fixed; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 10px 8px; border-top: 1px solid #2e2e2e; text-align: right; font-size: 13px; }
+th:first-child { padding-left: 14px; text-align: left; }
+th:last-child, td:last-child { padding-right: 14px; }
+thead th { color: #bbb; background: #1a1a1a; font-size: 11px; }
+thead th:nth-child(2) { width: 52px; }
+thead th:last-child { width: 77px; }
+td:last-child { color: #bbb; }
+.rank-name { display: flex; align-items: center; gap: 8px; }
+.rank { flex: 0 0 16px; color: #b9a98d; font-size: 11px; }
+.rank-name img { flex: none; object-fit: cover; border-radius: 5px; background: #222; }
+details { margin-top: 10px; border: 1px solid #343434; border-radius: 8px; }
+summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px; cursor: pointer; }
+summary::before { content: ''; width: 6px; height: 6px; border: solid #bbb; border-width: 0 1px 1px 0; transform: rotate(-45deg); }
+details[open] summary::before { transform: rotate(45deg); }
+summary time { margin-left: auto; color: #bbb; font-size: 12px; }
+.activity-badge { padding: 4px 8px; border-radius: 20px; background: #262626; color: #ddd; font-size: 11px; }
+.activity-badge.shared { background: #302a20; color: #e4d6be; }
+.journey-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 12px; border-top: 1px solid #303030; font-size: 13px; }
+.journey-row span { color: #bbb; }
+.empty { margin: 0; padding: 12px 16px; }
+.error { margin-bottom: 16px; color: #ff9292; }
+@media (max-width: 760px) { .rankings { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 420px) { summary time { margin-left: 0; } .rank-name { gap: 5px; } }
