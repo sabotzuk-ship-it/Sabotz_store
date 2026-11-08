@@ -21,7 +21,13 @@ export class ProductService {
   }
 
   getProducts(): Promise<Product[]> {
-    if (!this.catalogPromise) this.catalogPromise = this.request<Product[]>('/api/products');
+    if (!this.catalogPromise) {
+      const request = this.request<Product[]>('/api/products').catch(error => {
+        if (this.catalogPromise === request) this.catalogPromise = undefined;
+        throw error;
+      });
+      this.catalogPromise = request;
+    }
     return this.catalogPromise;
   }
 
