@@ -40,7 +40,7 @@ export class ProductService {
     return product.pagina.replace(/^products\//, '').replace(/\.html$/, '');
   }
 
-  async saveProduct(product: Product, isEditing: boolean): Promise<Product[]> {
+  async saveProduct(product: Omit<Product, 'pagina'> & { pagina?: string }, isEditing: boolean): Promise<Product[]> {
     const endpoint = isEditing ? `/api/admin/products/${encodeURIComponent(product.id)}` : '/api/admin/products';
     const savedProducts = await this.request<Product[]>(endpoint, {
       method: isEditing ? 'PUT' : 'POST',

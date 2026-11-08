@@ -1,3 +1,4 @@
+import { StoreImage } from '../../shared/store-image/store-image';
 import { HomeProductCard } from '../../shared/home-product-card/home-product-card';
 import { HomeSelection } from './selection/home-selection';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
@@ -14,7 +15,7 @@ import { ContactStrip } from '../../shared/contact-strip/contact-strip';
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, SideNav, HomeProductCard, HomeSelection, SocialLinks, ContactStrip],
+  imports: [StoreImage, CommonModule, RouterLink, SideNav, HomeProductCard, HomeSelection, SocialLinks, ContactStrip],
   templateUrl: './home.html',
   styleUrl: './home.css'
 })

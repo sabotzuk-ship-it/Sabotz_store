@@ -1,11 +1,234 @@
 {
   "produtos": [
     {
+      "id": "bd7c8b8d-3264-4621-8745-5b0d31a2a0dd",
+      "nome": "AMIRI / MA-1 Black White",
+      "marca": "Amiri",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 115,
+      "fotos": [
+        "assets/images/uploads/72919f36-a874-4b28-b7f1-6c43e108eab0.jpg",
+        "assets/images/uploads/bef457bf-30ec-46d9-8ea7-9cda2192f8af.jpg",
+        "assets/images/uploads/b5a997a7-a771-4b00-91e5-56c9c6babfa9.jpg",
+        "assets/images/uploads/014ca821-9302-42c4-87a3-acd0eb7497f2.jpg"
+      ],
+      "pagina": "products/amiri-ma-1-black-white.html"
+    },
+    {
+      "id": "6596cb4b-94b5-4229-9db8-89bf458fb6eb",
+      "nome": "New Balance 9060 / Sea Salt",
+      "marca": "New Balance",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 85,
+      "fotos": [
+        "assets/images/uploads/694257fb-7f44-476f-acd1-3ee65b952a1f.jpg",
+        "assets/images/uploads/bce523ec-242a-4136-9112-dd8f93d8b5cf.jpg",
+        "assets/images/uploads/4143126b-6668-46fe-96be-bb7e182589f3.jpg",
+        "assets/images/uploads/13d07954-be1c-4f53-a3b8-9e09e878c2eb.jpg"
+      ],
+      "pagina": "products/new-balance-9060-sea-salt.html"
+    },
+    {
+      "id": "2bf97f1d-f139-4bee-9db5-a3aee8beebd9",
+      "nome": "New Balance 9060 /Castlerock",
+      "marca": "New Balance",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 85,
+      "fotos": [
+        "assets/images/uploads/6633806b-8014-4478-afbe-c5eda3d4de71.jpg",
+        "assets/images/uploads/30ae98ff-6b33-4e66-8b70-5e9e2e5b1fd8.jpg",
+        "assets/images/uploads/9abd9c42-6c59-4a13-9dac-aac26f54a14d.jpg",
+        "assets/images/uploads/843203a8-ef5f-4542-85eb-658ed584fda4.jpg"
+      ],
+      "pagina": "products/new-balance-9060-castlerock.html"
+    },
+    {
+      "id": "880c22c4-9225-4d8a-a7a3-103046ed37cf",
+      "nome": "New Balance 9060 /Arctic Grey",
+      "marca": "New Balance",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 85,
+      "fotos": [
+        "assets/images/uploads/3f21f3db-1095-4f39-96d1-182909eae95b.jpg",
+        "assets/images/uploads/1bd3b483-0864-4810-bbba-e3673d83ec7e.jpg",
+        "assets/images/uploads/cae31f35-bd09-4507-ba20-780f8350a5be.jpg",
+        "assets/images/uploads/f1986fc7-ac3b-4eb1-b29f-9219c2fb325e.jpg"
+      ],
+      "pagina": "products/new-balance-9060-arctic-grey.html"
+    },
+    {
+      "id": "99549e3f-feff-4eaa-a09d-7377450c7bbd",
+      "nome": "Air Jordan 4 Retro Varsity Red",
+      "marca": "Nike",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 90,
+      "fotos": [
+        "assets/images/uploads/d11be099-be32-4e09-be0f-cc9fb0c84b27.jpg",
+        "assets/images/uploads/23897889-28a6-477b-b175-45a2a44f9022.jpg",
+        "assets/images/uploads/f9c9f2ee-3233-4f88-903a-08c7504379f5.jpg",
+        "assets/images/uploads/bc43c85e-4780-4cfe-825e-d5bed8d3f107.jpg"
+      ],
+      "pagina": "products/air-jordan-4-retrored.html"
+    },
+    {
+      "id": "d861deae-a892-4aa0-907e-00a62501be4b",
+      "nome": "Air Jordan 4 Retro /Navy",
+      "marca": "Nike",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 90,
+      "fotos": [
+        "assets/images/uploads/5ad3b3f9-002d-4406-8771-2a60d74b2166.jpg",
+        "assets/images/uploads/3d8b4d3c-a994-44e9-9921-6b912aeb7ce7.jpg",
+        "assets/images/uploads/716b68b0-97df-48a9-a84d-7dfb4f7c23a6.jpg",
+        "assets/images/uploads/664fac4a-fb41-4b1f-b2a9-9a34413f0c08.jpg"
+      ],
+      "pagina": "products/air-jordan-4-retro-navy.html"
+    },
+    {
+      "id": "ac54853c-2072-42f4-8e03-f31cec3e9c6a",
+      "nome": "Air Jordan 4 Retro /Thunder",
+      "marca": "Nike",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 90,
+      "fotos": [
+        "assets/images/uploads/3169d758-8169-49c1-9b47-9e248dcb2c6b.jpg",
+        "assets/images/uploads/b64cbf7b-ce96-420f-9e97-ef92d5db2d9f.jpg",
+        "assets/images/uploads/ce316527-3694-4ac4-8ad9-15f35f18d404.jpg",
+        "assets/images/uploads/330a8486-df51-4f8a-a70a-ae206b39019f.jpg"
+      ],
+      "pagina": "products/air-jordan-4-retro-thunder.html"
+    },
+    {
+      "id": "ad42d895-1f96-428e-a63e-14cece9b3d85",
+      "nome": "Jordan 4 Retro /Black Cat",
+      "marca": "Nike",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 90,
+      "fotos": [
+        "assets/images/uploads/7f20f7ba-62fa-4881-8bf8-8eec20bd2510.jpg",
+        "assets/images/uploads/2168ce74-22ba-4366-a766-063325ca6bf9.jpg",
+        "assets/images/uploads/359b9bf7-f87f-43bc-928f-a9dadd7f46eb.jpg",
+        "assets/images/uploads/86598257-cba9-4c17-b837-96af0a3ccb0d.jpg"
+      ],
+      "pagina": "products/air-jordan-4-retro-black-cat.html"
+    },
+    {
+      "id": "07d33d6a-bfc0-4330-95d1-1098db637123",
+      "nome": "Jordan 4 Retro /Military Black",
+      "marca": "Nike",
+      "categoria": "Shoes",
+      "status": "GALLERY PREVIEW",
+      "preco": 90,
+      "fotos": [
+        "assets/images/uploads/885da1c5-3176-470a-8030-c18d74680bd2.jpg",
+        "assets/images/uploads/61b88deb-5e6a-41e8-af05-9995efdb7116.jpg",
+        "assets/images/uploads/29341e56-3977-41a3-b8b6-a8b7663b9497.jpg",
+        "assets/images/uploads/8200d29f-6117-41bc-ade9-d0a36cacef81.jpg",
+        "assets/images/uploads/e3e71449-9c99-491d-9aba-6c19d1fbbb97.jpg",
+        "assets/images/uploads/d84cae7b-7167-41ea-88ba-fcd1b323c94c.jpg"
+      ],
+      "pagina": "products/air-jordan-4-retro-military-black.html"
+    },
+    {
+      "id": "891c3b71-fd7a-477a-b625-d8f2cc28ce86",
+      "nome": "Juliet X-Metal / Dark",
+      "marca": "Oakley",
+      "categoria": "Accessories",
+      "status": "GALLERY PREVIEW",
+      "preco": 50,
+      "fotos": [
+        "assets/images/uploads/0ca9805c-cb7d-4bfe-baf7-de3d29bb0553.jpg"
+      ],
+      "pagina": "products/glasses-oakley-dark.html"
+    },
+    {
+      "id": "e1721bc9-1e28-4506-894d-2ff58b0db19d",
+      "nome": "Juliet X-Metal Plasma / Silver Lens",
+      "marca": "Oakley",
+      "categoria": "Accessories",
+      "status": "GALLERY PREVIEW",
+      "preco": 50,
+      "fotos": [
+        "assets/images/uploads/d45067de-1823-4d50-9632-b1e6b76bdcb7.jpg"
+      ],
+      "pagina": "products/glasses-oakley-silverplasma.html"
+    },
+    {
+      "id": "75a6acdf-823e-40ce-ac3e-239652fd1391",
+      "nome": "Juliet X-Metal Silver/Emerald",
+      "marca": "Oakley",
+      "categoria": "Accessories",
+      "status": "GALLERY PREVIEW",
+      "preco": 50,
+      "fotos": [
+        "assets/images/uploads/486ab3aa-183d-453c-ab0e-d474a3039d8f.jpg"
+      ],
+      "pagina": "products/glasses-oakley-emerald.html"
+    },
+    {
+      "id": "f57e09f7-b564-49f6-97b2-e982140a88b0",
+      "nome": "Juliet Oakley X-Metal Gold/Emerald",
+      "marca": "Oakley",
+      "categoria": "Accessories",
+      "status": "GALLERY PREVIEW",
+      "preco": 50,
+      "fotos": [
+        "assets/images/uploads/165348bc-19ca-4852-9a83-4e7f271027e2.jpg"
+      ],
+      "pagina": "products/glasses-oakley-golden.html"
+    },
+    {
+      "id": "6742f555-9773-4d18-b464-3347f310cb90",
+      "nome": "Juliet X-Metal / Dark Grey",
+      "marca": "Oakley",
+      "categoria": "Accessories",
+      "status": "GALLERY PREVIEW",
+      "preco": 50,
+      "fotos": [
+        "assets/images/uploads/73366c3b-0a43-4800-b6c0-983b8632376d.jpg"
+      ],
+      "pagina": "products/glasses-oakley-saphire.html"
+    },
+    {
+      "id": "52135b41-5254-431c-b510-bcc25893a3e7",
+      "nome": "Plantaris Black/Purple Ts",
+      "marca": "Oakley",
+      "categoria": "Accessories",
+      "status": "GALLERY PREVIEW",
+      "preco": 50,
+      "fotos": [
+        "assets/images/uploads/16251a14-5b87-4b2f-8f4c-c2e82b48a810.jpg"
+      ],
+      "pagina": "products/glasses-oakley-purple.html"
+    },
+    {
+      "id": "3bf7f6e6-790e-4b0c-a284-80c776acb64f",
+      "nome": "Plantaris Black TS",
+      "marca": "Oakley",
+      "categoria": "Accessories",
+      "status": "GALLERY PREVIEW",
+      "preco": 50,
+      "fotos": [
+        "assets/images/uploads/810eff2d-b742-4311-ad66-b407a79bcb56.jpg",
+        "assets/images/uploads/3a7c5c45-e135-4edf-955d-27ff7349cf7f.jpg"
+      ],
+      "pagina": "products/glasses.html"
+    },
+    {
       "id": "jordan-olive-demo",
       "nome": "Jordan 1 Low Travis Scott Olive",
       "marca": "Nike",
       "categoria": "Shoes",
       "status": "GALLERY PREVIEW",
+      "preco": 100,
       "fotos": [
         "assets/images/jordan-olive/travis-olive-1.png",
         "assets/images/jordan-olive/travis-olive-2.png",
@@ -23,6 +246,7 @@
       "marca": "Nike",
       "categoria": "Shoes",
       "status": "GALLERY PREVIEW",
+      "preco": 100,
       "fotos": [
         "assets/images/jordan-reverse-mocha/reverse-mocha-1.png",
         "assets/images/jordan-reverse-mocha/reverse-mocha-2.png",
@@ -36,6 +260,7 @@
       "marca": "Nike",
       "categoria": "Shoes",
       "status": "GALLERY PREVIEW",
+      "preco": 100,
       "fotos": [
         "assets/images/jordan-travis-pink/travis-pink-1.png",
         "assets/images/jordan-travis-pink/travis-pink-2.png",
@@ -45,10 +270,11 @@
     },
     {
       "id": "air-force-1-13-black-grey-demo",
-      "nome": "Nike Air Force 1 Low Black Grey 13",
+      "nome": "Air Force 1 x Central Cee Black Smoke Grey",
       "marca": "Nike",
       "categoria": "Shoes",
       "status": "GALLERY PREVIEW",
+      "preco": 85,
       "fotos": [
         "assets/images/air-force-1-13/af1-13-1.png",
         "assets/images/air-force-1-13/af1-13-2.png",
@@ -58,10 +284,11 @@
     },
     {
       "id": "air-force-1-burgundy-demo",
-      "nome": "Nike Air Force 1 Low Burgundy",
+      "nome": "Air Force 1 x Central Cee Dark Beetroot",
       "marca": "Nike",
       "categoria": "Shoes",
       "status": "GALLERY PREVIEW",
+      "preco": 85,
       "fotos": [
         "assets/images/air-force-1-burgundy/af1-burgundy-1.png",
         "assets/images/air-force-1-burgundy/af1-burgundy-2.png",
@@ -76,6 +303,7 @@
       "marca": "Nike",
       "categoria": "Shoes",
       "status": "GALLERY PREVIEW",
+      "preco": 85,
       "fotos": [
         "assets/images/air-max-95-neon/airmax95-neon-1.png",
         "assets/images/air-max-95-neon/airmax95-neon-2.png",
@@ -90,6 +318,7 @@
       "marca": "Nike",
       "categoria": "Shoes",
       "status": "GALLERY PREVIEW",
+      "preco": 85,
       "fotos": [
         "assets/images/air-max-95-red/1.png",
         "assets/images/air-max-95-red/2.png",

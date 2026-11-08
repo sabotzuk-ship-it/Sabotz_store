@@ -10,7 +10,7 @@
     <app-catalog-filters [products]="products" #catalogFilters />
     <div class="products">
       <article class="product" *ngFor="let product of catalogFilters.visibleProducts">
-        <img [src]="'/' + product.fotos[0]" [alt]="product.nome" loading="lazy">
+        <img [storeImage]="'/' + product.fotos[0]" storeImageSizes="(max-width: 450px) 100vw, (max-width: 750px) 50vw, 350px" [alt]="product.nome" loading="lazy">
         <div class="details">
           <div class="brand">{{ product.marca.toUpperCase() }}</div>
           <div class="name">{{ product.nome }}</div>

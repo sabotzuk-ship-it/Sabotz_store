@@ -6,6 +6,8 @@ import express from 'express';
 import session from 'express-session';
 import helmet from 'helmet';
 import multer from 'multer';
+import { registerVisitorAnalytics } from './visitor-analytics.mjs';
+import { registerStoreImages } from './store-images.mjs';
 
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT || 3000);
@@ -101,7 +103,7 @@ function validateProduct(body, allowedCategories) {
   if (!status || status.length > 60) return 'Status is required (maximum 60 characters).';
   if (!allowedCategories.has(categoria)) return 'Choose a valid product category.';
   if (preco !== undefined && (typeof preco !== 'number' || !Number.isFinite(preco) || preco < 0 || preco > 10000000)) return 'Enter a valid non-negative product price.';
-  if (!/^(?:products\/)?[a-z0-9]+(?:-[a-z0-9]+)*(?:\.html)?$/.test(pagina)) return 'Use a lowercase product slug, for example products/new-shoe.html.';
+  if (body?.pagina !== undefined && !/^(?:products\/)?[a-z0-9]+(?:-[a-z0-9]+)*(?:\.html)?$/.test(pagina)) return 'Use a lowercase product slug, for example products/new-shoe.html.';
   if (!fotos.length || fotos.length > 20) return 'Add between 1 and 20 product images.';
   if (fotos.some(photo => typeof photo !== 'string' || !/^assets\/images\/[a-zA-Z0-9._/-]+$/.test(photo) || photo.split('/').includes('..'))) {
     return 'Image paths must point to a file inside assets/images/.';
@@ -120,6 +122,27 @@ async function writeProducts(produtos) {
   const temporaryPath = `${catalogPath}.${crypto.randomUUID()}.tmp`;
   await fs.writeFile(temporaryPath, `${JSON.stringify({ produtos }, null, 2)}\n`, 'utf8');
   await fs.rename(temporaryPath, catalogPath);
+}
+
+function productSlug(page) {
+  return page.replace(/^products\//, '').replace(/\.html$/, '');
+}
+
+function nextProductPage(name, usedSlugs) {
+  const base = name.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'product';
+  let slug = base;
+  for (let suffix = 2; usedSlugs.has(slug); suffix++) slug = `${base}-${suffix}`;
+  return `products/${slug}.html`;
+}
+
+let productWrites = Promise.resolve();
+function serializeProductWrite(handler) {
+  return (req, res, next) => {
+    const operation = productWrites.then(() => handler(req, res, next));
+    productWrites = operation.catch(() => {});
+    return operation;
+  };
 }
 
 async function readSiteSettings() {
@@ -313,24 +336,25 @@ app.post('/api/admin/logout', requireAdmin, (req, res, next) => {
   });
 });
 
-app.post('/api/admin/products', requireAdmin, async (req, res, next) => {
+app.post('/api/admin/products', requireAdmin, serializeProductWrite(async (req, res, next) => {
   try {
     const settings = await readSiteSettings();
     const validationError = validateProduct(req.body, new Set(settings.categories.map(category => category.name)));
     if (validationError) return res.status(400).json({ error: validationError });
     const products = await readProducts();
-    const page = req.body.pagina.trim();
-    if (products.some(product => product.pagina === page)) return res.status(409).json({ error: 'This product slug is already in use.' });
-    const product = { ...req.body, id: crypto.randomUUID(), nome: req.body.nome.trim(), marca: req.body.marca.trim(), status: req.body.status.trim() };
+    const usedSlugs = new Set(products.map(product => productSlug(product.pagina)));
+    const page = req.body.pagina?.trim() ?? nextProductPage(req.body.nome, usedSlugs);
+    if (usedSlugs.has(productSlug(page))) return res.status(409).json({ error: 'This product slug is already in use.' });
+    const product = { ...req.body, pagina: page, id: crypto.randomUUID(), nome: req.body.nome.trim(), marca: req.body.marca.trim(), status: req.body.status.trim() };
     products.unshift(product);
     await writeProducts(products);
     res.status(201).json(products);
   } catch (error) {
     next(error);
   }
-});
+}));
 
-app.put('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
+app.put('/api/admin/products/:id', requireAdmin, serializeProductWrite(async (req, res, next) => {
   try {
     const settings = await readSiteSettings();
     const validationError = validateProduct(req.body, new Set(settings.categories.map(category => category.name)));
@@ -339,20 +363,20 @@ app.put('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
     const index = products.findIndex(product => product.id === req.params.id);
     if (index < 0) return res.status(404).json({ error: 'Product not found.' });
     const previousPhotos = products[index].fotos ?? [];
-    const page = req.body.pagina.trim();
-    if (products.some((product, productIndex) => productIndex !== index && product.pagina === page)) {
+    const page = req.body.pagina?.trim() ?? products[index].pagina;
+    if (req.body.pagina !== undefined && products.some((product, productIndex) => productIndex !== index && productSlug(product.pagina) === productSlug(page))) {
       return res.status(409).json({ error: 'This product slug is already in use.' });
     }
-    products[index] = { ...req.body, id: req.params.id, nome: req.body.nome.trim(), marca: req.body.marca.trim(), status: req.body.status.trim() };
+    products[index] = { ...req.body, pagina: page, id: req.params.id, nome: req.body.nome.trim(), marca: req.body.marca.trim(), status: req.body.status.trim() };
     await writeProducts(products);
     await cleanupUnusedUploadedPhotos(previousPhotos, products);
     res.json(products);
   } catch (error) {
     next(error);
   }
-});
+}));
 
-app.delete('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
+app.delete('/api/admin/products/:id', requireAdmin, serializeProductWrite(async (req, res, next) => {
   try {
     const products = await readProducts();
     const deletedProduct = products.find(product => product.id === req.params.id);
@@ -364,7 +388,13 @@ app.delete('/api/admin/products/:id', requireAdmin, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+}));
+
+registerVisitorAnalytics(app, {
+  requireAdmin,
+  databasePath: process.env.VISITOR_DB_PATH || path.join(currentDirectory, 'data', 'visitors.sqlite')
 });
+registerStoreImages(app, path.join(currentDirectory, 'public'));
 
 const builtBrowserDirectory = path.join(currentDirectory, 'dist', 'sabotz-angular', 'browser');
 const builtDirectory = path.join(currentDirectory, 'dist', 'sabotz-angular');

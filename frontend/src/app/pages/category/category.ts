@@ -1,3 +1,4 @@
+import { StoreImage } from '../../shared/store-image/store-image';
 import { CatalogFilters } from '../../shared/catalog-filters/catalog-filters';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
@@ -11,7 +12,7 @@ import { SideNav } from '../../shared/side-nav/side-nav';
 @Component({
   selector: 'app-category-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, SideNav, CatalogFilters],
+  imports: [StoreImage, CommonModule, RouterLink, SideNav, CatalogFilters],
   templateUrl: './category.html',
   styleUrls: ['./category.css', '../shoes/shoes.css']
 })

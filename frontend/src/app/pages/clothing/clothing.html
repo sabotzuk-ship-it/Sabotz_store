@@ -5,7 +5,7 @@
     <app-side-nav />
   </header>
   <main class="coming-soon" *ngIf="clothingCategory?.comingSoon; else clothingCatalog">
-    <img [src]="categoryImageUrl(clothingCategory?.image || 'clothing.jpg')" alt="SABOTZ clothing collection">
+    <img [storeImage]="categoryImageUrl(clothingCategory?.image || 'clothing.jpg')" storeImageSizes="100vw" alt="SABOTZ clothing collection">
     <div class="message">
       <span>COMING SOON</span>
       <h1>JACKETS &amp; CLOTHING</h1>
@@ -20,7 +20,7 @@
       <app-catalog-filters [products]="products" #catalogFilters />
       <div class="products">
         <article class="product" *ngFor="let product of catalogFilters.visibleProducts">
-          <img [src]="'/' + product.fotos[0]" [alt]="product.nome" loading="lazy">
+          <img [storeImage]="'/' + product.fotos[0]" storeImageSizes="(max-width: 450px) 100vw, (max-width: 750px) 50vw, 350px" [alt]="product.nome" loading="lazy">
           <div class="details">
             <div class="brand">{{ product.marca.toUpperCase() }}</div>
             <div class="name">{{ product.nome }}</div>

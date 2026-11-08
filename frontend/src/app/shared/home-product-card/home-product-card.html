@@ -1,6 +1,6 @@
 <article class="arrival-card">
     <a class="product-photo" [routerLink]="['/products', productSlug(product)]" [attr.aria-label]="'View ' + product.nome">
-      <img [src]="'/' + product.fotos[0]" [alt]="product.nome" width="500" height="600" loading="lazy">
+      <img [storeImage]="'/' + product.fotos[0]" storeImageSizes="(max-width: 849px) 50vw, 350px" [alt]="product.nome" width="500" height="600" loading="lazy">
       <span class="gallery-label">VIEW PIECE <span aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></span></span>
     </a>
     <div class="product-info"><p class="product-brand">{{ product.marca }}</p><h3><a [routerLink]="['/products', productSlug(product)]">{{ product.nome }}</a></h3><p class="product-price">{{ product.preco !== undefined ? formatPrice(product.preco) : 'PRICE ON REQUEST' }}</p></div>
