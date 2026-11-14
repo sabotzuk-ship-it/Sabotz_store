@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Product, ProductPresentation } from './product.model';
+import { Product, ProductCatalog, ProductPresentation } from './product.model';
+import { readPublicStoreData } from './public-store-data';
 
 const presentations: Record<string, ProductPresentation> = {
   'jordan-olive': { collection: 'JORDAN COLLECTION', description: 'Gallery preview featuring a low-top sneaker design in black, white and olive tones. Explore the images to view the design from different angles.' },
@@ -22,10 +23,16 @@ export class ProductService {
 
   getProducts(): Promise<Product[]> {
     if (!this.catalogPromise) {
-      const request = this.request<Product[]>('/api/products').catch(error => {
-        if (this.catalogPromise === request) this.catalogPromise = undefined;
-        throw error;
-      });
+      const request = readPublicStoreData<Product[] | ProductCatalog>('/api/products', '/data/products.json')
+        .then(data => {
+          const products = Array.isArray(data) ? data : data?.produtos;
+          if (!Array.isArray(products)) throw new Error('Invalid product catalogue.');
+          return products;
+        })
+        .catch(error => {
+          if (this.catalogPromise === request) this.catalogPromise = undefined;
+          throw error;
+        });
       this.catalogPromise = request;
     }
     return this.catalogPromise;

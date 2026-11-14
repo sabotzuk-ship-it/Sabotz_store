@@ -48,6 +48,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "site-settings.json",
+                "input": "data",
+                "output": "data"
               }
             ],
             "styles": [

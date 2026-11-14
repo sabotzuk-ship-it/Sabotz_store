@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { defaultSiteSettings, SiteSettings } from './site-settings.model';
+import { SiteSettings } from './site-settings.model';
+import { readPublicStoreData } from './public-store-data';
 
 @Injectable({ providedIn: 'root' })
 export class SiteSettingsService {
   async getSettings(): Promise<SiteSettings> {
-    const response = await fetch('/api/site-settings', { cache: 'no-store' });
-    const body = await response.json().catch(() => ({})) as SiteSettings & { error?: string };
-    if (!response.ok) throw new Error(body.error || 'Could not load site settings.');
-    return body;
+    const settings = await readPublicStoreData<SiteSettings>('/api/site-settings', '/data/site-settings.json');
+    if (!Array.isArray(settings?.categories)) throw new Error('Invalid store settings.');
+    return settings;
   }
 
   async saveSettings(settings: SiteSettings): Promise<SiteSettings> {
