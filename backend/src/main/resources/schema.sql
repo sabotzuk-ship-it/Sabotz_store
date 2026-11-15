@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS store_documents (name VARCHAR(40) PRIMARY KEY, content TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS store_images (name VARCHAR(100) PRIMARY KEY, mime VARCHAR(40) NOT NULL, content BYTEA NOT NULL);
+CREATE TABLE IF NOT EXISTS visitor_entries (id VARCHAR(36) PRIMARY KEY, email VARCHAR(254) NOT NULL, entered_at BIGINT NOT NULL, tracking BOOLEAN NOT NULL);
+CREATE INDEX IF NOT EXISTS visitor_entries_date ON visitor_entries(entered_at);
+CREATE TABLE IF NOT EXISTS page_visits (
+  visitor_id VARCHAR(36) NOT NULL REFERENCES visitor_entries(id) ON DELETE CASCADE,
+  view_id VARCHAR(32) NOT NULL, path VARCHAR(200) NOT NULL, opened_at BIGINT NOT NULL, seconds INTEGER NOT NULL,
+  PRIMARY KEY (visitor_id, view_id)
+);
+CREATE TABLE IF NOT EXISTS welcome_delivery (email_hash VARCHAR(64) PRIMARY KEY, attempted_at BIGINT NOT NULL, sent BOOLEAN NOT NULL DEFAULT FALSE);
