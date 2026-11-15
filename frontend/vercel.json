@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "https://sabotz-store.onrender.com/api/:path*" },
+    { "source": "/assets/images/uploads/:path*", "destination": "https://sabotz-store.onrender.com/assets/images/uploads/:path*" },
+    { "source": "/:page(collection|shoes|accessories|clothing|admin)", "destination": "/index.html" },
+    { "source": "/categories/:id", "destination": "/index.html" },
+    { "source": "/products/:slug", "destination": "/index.html" }
+  ]
+}
