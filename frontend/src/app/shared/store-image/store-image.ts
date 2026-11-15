@@ -41,6 +41,6 @@ export class StoreImage implements OnChanges {
   }
 
   private optimized(width: number): string {
-    return `/api/images/${width}?path=${encodeURIComponent(this.storeImage.replace(/^\//, ''))}&v=2`;
+    return `/api/images/${width}?path=${encodeURIComponent(this.storeImage.replace(/^\//, ''))}&v=3`;
   }
 }
