@@ -22,6 +22,8 @@ npm.cmd run ng -- serve --proxy-config proxy.conf.json
 
 Abra http://localhost:4200/admin. A API usa a porta 3000. Pare o backend Express antes de iniciar o Spring nessa porta.
 
+Para usar o Neon localmente, faça o vínculo pela CLI e rode `neon deploy` ou `neon env pull` na raiz. O Spring lê `DATABASE_URL_UNPOOLED` ou `DATABASE_URL` do ambiente ou do arquivo local criado pela CLI. A conexão direta tem prioridade porque o servidor aplica o esquema ao iniciar. `JDBC_DATABASE_URL` continua disponível para definir a conexão explicitamente no Render.
+
 O primeiro início carrega o catálogo, as categorias e os pedidos dos JSON existentes e importa as fotos de upload vinculadas aos produtos ou categorias. Faça o build a partir da cópia que contém os arquivos atuais da loja. Edições feitas depois ficam no banco. Para importar também o histórico dos últimos 90 dias, pare o Express, faça backup do SQLite e configure `LEGACY_VISITOR_DB` com o caminho absoluto do arquivo antes da primeira inicialização com o banco novo. A importação lê a origem sem alterá-la e roda uma vez por banco.
 
 ## Publicar

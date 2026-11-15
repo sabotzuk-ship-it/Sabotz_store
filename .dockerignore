@@ -1,0 +1,15 @@
+**
+!backend/
+!backend/pom.xml
+!backend/src/
+!backend/src/**
+!frontend/
+!frontend/data/
+!frontend/data/orders.json
+!frontend/data/site-settings.json
+!frontend/public/
+!frontend/public/data/
+!frontend/public/data/products.json
+!frontend/public/assets/
+!frontend/public/assets/images/
+!frontend/public/assets/images/**
