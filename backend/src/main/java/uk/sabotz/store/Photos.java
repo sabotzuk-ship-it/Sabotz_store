@@ -1,5 +1,8 @@
 package uk.sabotz.store;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.exif.ExifIFD0Directory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.ImageIO;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -80,14 +84,18 @@ class Photos {
                 int w = reader.getWidth(0);
                 int h = reader.getHeight(0);
                 if ((long) w * h > 40_000_000) throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
-                double scale = Math.min((double) width / w, width * 1.6 / h);
+                int orientation = orientation(source.bytes);
+                int imageWidth = orientation >= 5 ? h : w;
+                int imageHeight = orientation >= 5 ? w : h;
+                double scale = Math.min((double) width / imageWidth, width * 1.6 / imageHeight);
                 if (scale >= 1) return image(source);
-                var output = new BufferedImage(Math.max(1, (int) (w * scale)), Math.max(1, (int) (h * scale)),
+                var output = new BufferedImage(Math.max(1, (int) (imageWidth * scale)), Math.max(1, (int) (imageHeight * scale)),
                         source.mime.equals("image/png") ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
                 var graphics = output.createGraphics();
                 try {
                     graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                    graphics.drawImage(reader.read(0), 0, 0, output.getWidth(), output.getHeight(), null);
+                    graphics.scale((double) output.getWidth() / imageWidth, (double) output.getHeight() / imageHeight);
+                    graphics.drawImage(reader.read(0), orient(orientation, w, h), null);
                 } finally {
                     graphics.dispose();
                 }
@@ -98,6 +106,30 @@ class Photos {
                 reader.dispose();
             }
         }
+    }
+
+    private int orientation(byte[] bytes) {
+        try {
+            var directory = ImageMetadataReader.readMetadata(new ByteArrayInputStream(bytes))
+                    .getFirstDirectoryOfType(ExifIFD0Directory.class);
+            Integer value = directory == null ? null : directory.getInteger(ExifIFD0Directory.TAG_ORIENTATION);
+            return value != null && value >= 1 && value <= 8 ? value : 1;
+        } catch (ImageProcessingException | IOException error) {
+            return 1;
+        }
+    }
+
+    private AffineTransform orient(int orientation, int width, int height) {
+        return switch (orientation) {
+            case 2 -> new AffineTransform(-1, 0, 0, 1, width, 0);
+            case 3 -> new AffineTransform(-1, 0, 0, -1, width, height);
+            case 4 -> new AffineTransform(1, 0, 0, -1, 0, height);
+            case 5 -> new AffineTransform(0, 1, 1, 0, 0, 0);
+            case 6 -> new AffineTransform(0, 1, -1, 0, height, 0);
+            case 7 -> new AffineTransform(0, -1, -1, 0, height, width);
+            case 8 -> new AffineTransform(0, -1, 1, 0, 0, width);
+            default -> new AffineTransform();
+        };
     }
 
     private Photo load(String path) throws IOException {
