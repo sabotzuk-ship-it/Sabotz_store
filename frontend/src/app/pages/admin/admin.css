@@ -54,6 +54,9 @@ button.danger { background: #6e2424; color: white; }
 .order-editor h3 { margin: 0 0 14px; font-size: 16px; }
 .order-editor button { margin-top: 10px; }
 .order-editor input, .order-editor select, .orders-toolbar select, .order-card select { display: block; margin-top: 6px; }
+.order-items li { display: flex; align-items: center; gap: 12px; }
+.order-item-photo { flex: 0 0 60px; object-fit: cover; border-radius: 6px; background: #1d1d1d; }
+.order-item-price { margin-left: auto; }
 .orders-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 14px; }
 .orders-toolbar label { margin: 0; min-width: min(100%, 220px); }
 .selected-pieces-settings { margin: 0 0 24px; padding-bottom: 20px; border-bottom: 1px solid #333; }
