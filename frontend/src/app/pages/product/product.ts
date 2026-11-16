@@ -21,7 +21,7 @@ export class ProductPage implements OnInit {
   product?: Product;
   presentation: ProductPresentation = { collection: '', description: '' };
   selectedIndex = 0;
-  readonly ukSizes = Array.from({ length: 18 }, (_, index) => String(3 + index / 2));
+  readonly ukSizes = Array.from({ length: 13 }, (_, index) => String(5 + index / 2));
   selectedUkSize = '';
   isFootwear = false;
   error = '';
