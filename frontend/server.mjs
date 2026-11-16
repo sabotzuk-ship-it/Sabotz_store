@@ -19,6 +19,7 @@ const catalogPath = path.join(currentDirectory, 'public', 'data', 'products.json
 const adminCatalogPath = path.join(currentDirectory, 'data', 'admin-products.json');
 const publicProductFields = ['id', 'nome', 'marca', 'status', 'categoria', 'preco', 'discountPercent', 'fotos', 'pagina'];
 const ordersPath = path.join(currentDirectory, 'data', 'orders.json');
+const adminOrdersPath = path.join(currentDirectory, 'data', 'admin-orders.json');
 const siteSettingsPath = path.join(currentDirectory, 'data', 'site-settings.json');
 const imageUploadDirectory = path.join(currentDirectory, 'public', 'assets', 'images', 'uploads');
 
@@ -48,7 +49,7 @@ app.use(session({
   }
 }));
 app.use('/api/admin', (req, res, next) => {
-  if (['POST', 'PUT', 'DELETE'].includes(req.method) && req.get('X-Requested-With') !== 'XMLHttpRequest') {
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method) && req.get('X-Requested-With') !== 'XMLHttpRequest') {
     return res.status(403).json({ error: 'The request could not be verified.' });
   }
   next();
@@ -271,17 +272,96 @@ app.post('/api/admin/login', (req, res, next) => {
 
 app.get('/api/admin/session', requireAdmin, (_req, res) => res.json({ authenticated: true }));
 
+async function readOrders() {
+  const contents = await fs.readFile(adminOrdersPath, 'utf8').catch(error => {
+    if (error.code !== 'ENOENT') throw error;
+    return fs.readFile(ordersPath, 'utf8').catch(error => {
+      if (error.code === 'ENOENT') return '[]';
+      throw error;
+    });
+  });
+  const orders = JSON.parse(contents);
+  if (!Array.isArray(orders)) throw new Error('The orders file has an invalid format.');
+  return orders;
+}
+
+async function writeOrders(orders) {
+  const temporaryPath = `${adminOrdersPath}.${crypto.randomUUID()}.tmp`;
+  await fs.writeFile(temporaryPath, JSON.stringify(orders), 'utf8');
+  await fs.rename(temporaryPath, adminOrdersPath);
+}
+
+function orderStatusError(body) {
+  if (Object.hasOwn(body, 'paymentStatus') && !['awaiting-payment', 'paid'].includes(body.paymentStatus)) {
+    return 'Choose a valid payment status.';
+  }
+  if (Object.hasOwn(body, 'deliveryStatus') &&
+      !['ordered', 'awaiting-arrival', 'ready', 'shipped', 'delivered', 'cancelled'].includes(body.deliveryStatus)) {
+    return 'Choose a valid delivery status.';
+  }
+  return null;
+}
+
 app.get('/api/admin/orders', requireAdmin, async (_req, res, next) => {
   try {
-    const contents = await fs.readFile(ordersPath, 'utf8').catch(error => error.code === 'ENOENT' ? '[]' : Promise.reject(error));
-    const orders = JSON.parse(contents);
-    if (!Array.isArray(orders)) throw new Error('The orders file has an invalid format.');
-    res.set('Cache-Control', 'no-store');
-    res.json(orders);
+    res.json(await readOrders());
   } catch (error) {
     next(error);
   }
 });
+
+app.post('/api/admin/orders', requireAdmin, serializeProductWrite(async (req, res, next) => {
+  try {
+    const body = req.body ?? {};
+    const customerName = typeof body.customerName === 'string' ? body.customerName.trim() : '';
+    const itemName = typeof body.itemName === 'string' ? body.itemName.trim() : '';
+    const { id = crypto.randomUUID(), quantity, total, paymentStatus = 'awaiting-payment', deliveryStatus = 'ordered' } = body;
+    if (typeof id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id)) {
+      return res.status(400).json({ error: 'Invalid order ID.' });
+    }
+    if (!customerName || customerName.length > 120 || !itemName || itemName.length > 160) {
+      return res.status(400).json({ error: 'Enter the customer and product.' });
+    }
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+      return res.status(400).json({ error: 'Enter a quantity from 1 to 99.' });
+    }
+    if (total !== undefined && (typeof total !== 'number' || !Number.isFinite(total) ||
+        total < 0 || total > 1000000 || Number(total.toFixed(2)) !== total)) {
+      return res.status(400).json({ error: 'Enter a valid total in GBP.' });
+    }
+    const error = orderStatusError(body);
+    if (error) return res.status(400).json({ error });
+    const orders = await readOrders();
+    const existing = orders.find(order => order.id === id);
+    if (existing) return res.status(201).json(existing);
+    const order = {
+      id, createdAt: new Date().toISOString(), status: 'manual',
+      customerName, items: [{ name: itemName, quantity }], total, paymentStatus, deliveryStatus
+    };
+    orders.unshift(order);
+    await writeOrders(orders);
+    res.status(201).json(order);
+  } catch (error) {
+    next(error);
+  }
+}));
+
+app.patch('/api/admin/orders/:id', requireAdmin, serializeProductWrite(async (req, res, next) => {
+  try {
+    const body = req.body ?? {};
+    const error = orderStatusError(body);
+    if (error) return res.status(400).json({ error });
+    const orders = await readOrders();
+    const order = orders.find(order => order.id === req.params.id);
+    if (!order) return res.status(404).json({ error: 'Order not found.' });
+    if (body.paymentStatus !== undefined) order.paymentStatus = body.paymentStatus;
+    if (body.deliveryStatus !== undefined) order.deliveryStatus = body.deliveryStatus;
+    await writeOrders(orders);
+    res.json(order);
+  } catch (error) {
+    next(error);
+  }
+}));
 
 app.put('/api/admin/site-settings', requireAdmin, serializeProductWrite(async (req, res, next) => {
   try {

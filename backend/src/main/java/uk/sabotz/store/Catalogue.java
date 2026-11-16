@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.text.Normalizer;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -83,6 +84,76 @@ class Catalogue implements InitializingBean {
     @GetMapping("/api/admin/orders")
     JsonNode orders() throws IOException {
         return read("orders", false);
+    }
+
+    @PostMapping("/api/admin/orders")
+    @ResponseStatus(HttpStatus.CREATED)
+    @Transactional(rollbackFor = IOException.class)
+    JsonNode addOrder(@RequestBody ObjectNode body) throws IOException {
+        var orders = (ArrayNode) read("orders", true);
+        String id = body.has("id") ? body.path("id").asText() : UUID.randomUUID().toString();
+        if (!id.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")) throw bad("Invalid order ID.");
+        for (JsonNode existing : orders) {
+            if (id.equals(existing.path("id").asText())) return existing;
+        }
+        var order = json.createObjectNode();
+        order.put("id", id);
+        order.put("createdAt", Instant.now().toString());
+        order.put("customerName", required(body, "customerName", 120));
+        order.put("status", "manual");
+        var item = order.putArray("items").addObject();
+        item.put("name", required(body, "itemName", 160));
+        JsonNode quantity = body.path("quantity");
+        if (!quantity.isIntegralNumber() || !quantity.canConvertToInt() || quantity.asInt() < 1 || quantity.asInt() > 99) {
+            throw bad("Enter a quantity from 1 to 99.");
+        }
+        item.set("quantity", quantity);
+        if (body.has("total")) {
+            JsonNode amount = body.get("total");
+            if (!amount.isNumber() || !Double.isFinite(amount.asDouble())) throw bad("Enter a valid total in GBP.");
+            BigDecimal total = amount.decimalValue().stripTrailingZeros();
+            if (total.signum() < 0 || total.compareTo(BigDecimal.valueOf(1_000_000)) > 0 || total.scale() > 2) {
+                throw bad("Enter a valid total in GBP.");
+            }
+            order.set("total", amount);
+        }
+        setOrderStatus(order, body);
+        orders.insert(0, order);
+        write("orders", orders);
+        return order;
+    }
+
+    @PatchMapping("/api/admin/orders/{id}")
+    @Transactional(rollbackFor = IOException.class)
+    JsonNode updateOrderStatus(@PathVariable String id, @RequestBody ObjectNode body) throws IOException {
+        var orders = (ArrayNode) read("orders", true);
+        for (JsonNode item : orders) {
+            if (!id.equals(item.path("id").asText())) continue;
+            var order = (ObjectNode) item;
+            setOrderStatus(order, body);
+            write("orders", orders);
+            return order;
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found.");
+    }
+
+    private void setOrderStatus(ObjectNode order, ObjectNode body) {
+        if (body.has("paymentStatus")) {
+            String status = body.path("paymentStatus").asText();
+            if (!Set.of("awaiting-payment", "paid").contains(status)) throw bad("Choose a valid payment status.");
+            order.put("paymentStatus", status);
+        } else if (!order.has("paymentStatus") && "manual".equals(order.path("status").asText())) {
+            order.put("paymentStatus", "awaiting-payment");
+        }
+        if (body.has("deliveryStatus")) {
+            String status = body.path("deliveryStatus").asText();
+            if (!Set.of("ordered", "awaiting-arrival", "ready", "shipped", "delivered", "cancelled").contains(status)) {
+                throw bad("Choose a valid delivery status.");
+            }
+            order.put("deliveryStatus", status);
+        } else if (!order.has("deliveryStatus") && "manual".equals(order.path("status").asText())) {
+            order.put("deliveryStatus", "ordered");
+        }
     }
 
     @PostMapping("/api/admin/products")
