@@ -16,6 +16,8 @@ const adminPassword = process.env.ADMIN_PASSWORD;
 const sessionSecret = process.env.SESSION_SECRET;
 const isProduction = process.env.NODE_ENV === 'production';
 const catalogPath = path.join(currentDirectory, 'public', 'data', 'products.json');
+const adminCatalogPath = path.join(currentDirectory, 'data', 'admin-products.json');
+const publicProductFields = ['id', 'nome', 'marca', 'status', 'categoria', 'preco', 'discountPercent', 'fotos', 'pagina'];
 const ordersPath = path.join(currentDirectory, 'data', 'orders.json');
 const siteSettingsPath = path.join(currentDirectory, 'data', 'site-settings.json');
 const imageUploadDirectory = path.join(currentDirectory, 'public', 'assets', 'images', 'uploads');
@@ -86,6 +88,7 @@ function sameSecret(input, expected) {
 
 function requireAdmin(req, res, next) {
   if (req.session.adminUsername !== adminUsername) return res.status(401).json({ error: 'Admin login required.' });
+  res.set('Cache-Control', 'no-store');
   next();
 }
 
@@ -112,20 +115,43 @@ function validateProduct(body, allowedCategories) {
   if (fotos.some(photo => typeof photo !== 'string' || !/^assets\/images\/[a-zA-Z0-9._/-]+$/.test(photo) || photo.split('/').includes('..'))) {
     return 'Image paths must point to a file inside assets/images/.';
   }
+  if (body.sourcing !== undefined) {
+    const sourcing = body.sourcing;
+    if (!sourcing || typeof sourcing !== 'object' || Array.isArray(sourcing)) return 'Check the supplier details.';
+    const { supplierUrl, itemCost, shippingCost } = sourcing;
+    if (supplierUrl !== undefined) {
+      const value = typeof supplierUrl === 'string' ? supplierUrl.trim() : '';
+      const url = URL.parse(value);
+      if (!/^https?:\/\//i.test(value) || /[\s\\]/.test(value) || value.length > 2048 || !url?.hostname || url.username || url.password) {
+        return 'Enter a valid HTTP or HTTPS supplier link.';
+      }
+    }
+    for (const cost of [itemCost, shippingCost]) {
+      if (cost !== undefined && (typeof cost !== 'number' || !Number.isFinite(cost)
+        || cost < 0 || cost > 10000000 || Number(cost.toFixed(2)) !== cost)) {
+        return 'Enter non-negative costs in GBP with up to two decimal places.';
+      }
+    }
+    body.sourcing = { supplierUrl: supplierUrl?.trim(), itemCost, shippingCost };
+  }
 
   return null;
 }
 
 async function readProducts() {
-  const catalog = JSON.parse(await fs.readFile(catalogPath, 'utf8'));
+  const contents = await fs.readFile(adminCatalogPath, 'utf8').catch(error => {
+    if (error.code !== 'ENOENT') throw error;
+    return fs.readFile(catalogPath, 'utf8');
+  });
+  const catalog = JSON.parse(contents);
   if (!catalog || !Array.isArray(catalog.produtos)) throw new Error('The product catalogue has an invalid format.');
   return catalog.produtos;
 }
 
 async function writeProducts(produtos) {
-  const temporaryPath = `${catalogPath}.${crypto.randomUUID()}.tmp`;
+  const temporaryPath = `${adminCatalogPath}.${crypto.randomUUID()}.tmp`;
   await fs.writeFile(temporaryPath, `${JSON.stringify({ produtos }, null, 2)}\n`, 'utf8');
-  await fs.rename(temporaryPath, catalogPath);
+  await fs.rename(temporaryPath, adminCatalogPath);
 }
 
 function productSlug(page) {
@@ -191,6 +217,17 @@ async function cleanupUnusedUploadedPhotos(photos, products) {
 app.get('/api/products', async (_req, res, next) => {
   try {
     res.set('Cache-Control', 'no-store');
+    const products = await readProducts();
+    res.json(products.map(product => Object.fromEntries(
+      publicProductFields.filter(field => Object.hasOwn(product, field)).map(field => [field, product[field]])
+    )));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/admin/products', requireAdmin, async (_req, res, next) => {
+  try {
     res.json(await readProducts());
   } catch (error) {
     next(error);
@@ -371,7 +408,7 @@ app.put('/api/admin/products/:id', requireAdmin, serializeProductWrite(async (re
     if (req.body.pagina !== undefined && products.some((product, productIndex) => productIndex !== index && productSlug(product.pagina) === productSlug(page))) {
       return res.status(409).json({ error: 'This product slug is already in use.' });
     }
-    products[index] = { ...req.body, pagina: page, id: req.params.id, nome: req.body.nome.trim(), marca: req.body.marca.trim(), status: req.body.status.trim() };
+    products[index] = { sourcing: products[index].sourcing, ...req.body, pagina: page, id: req.params.id, nome: req.body.nome.trim(), marca: req.body.marca.trim(), status: req.body.status.trim() };
     await writeProducts(products);
     await cleanupUnusedUploadedPhotos(previousPhotos, products);
     res.json(products);

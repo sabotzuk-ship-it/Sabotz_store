@@ -12,6 +12,7 @@ npm-debug.log
 yarn-error.log
 /.env
 /data/visitors.sqlite*
+/data/admin-products.json*
 
 # IDEs and editors
 .idea/
