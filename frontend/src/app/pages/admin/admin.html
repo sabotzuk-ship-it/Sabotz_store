@@ -157,7 +157,23 @@
         <h3>Add an order</h3>
         <div class="grid">
           <label>Customer name or handle<input name="orderCustomer" [(ngModel)]="orderForm.customerName" maxlength="120" required></label>
-          <label>Product and size<input name="orderItem" [(ngModel)]="orderForm.itemName" maxlength="160" required></label>
+          <label>Product
+            <select name="orderProduct" [ngModel]="orderForm.productId" (ngModelChange)="selectOrderProduct($event)" required>
+              <option value="">Select a product</option>
+              <option *ngFor="let product of products" [value]="product.id">{{ product.marca }} · {{ product.nome }}</option>
+              <option value=":manual">Other product (enter manually)</option>
+            </select>
+          </label>
+          @if (orderForm.productId === ':manual') {
+            <label>Product and size<input name="orderItem" [(ngModel)]="orderForm.itemName" maxlength="160" required></label>
+          } @else if (orderProductUsesUkSize) {
+            <label>UK shoe size
+              <select name="orderUkSize" [(ngModel)]="orderForm.ukSize">
+                <option value="">Size not specified</option>
+                <option *ngFor="let size of ukShoeSizes" [value]="size">UK {{ size }}</option>
+              </select>
+            </label>
+          }
           <label>Quantity<input name="orderQuantity" [(ngModel)]="orderForm.quantity" type="number" min="1" max="99" step="1" required></label>
           <label>Total (£)<input name="orderTotal" [(ngModel)]="orderForm.total" type="number" min="0" max="1000000" step="0.01"></label>
           <label>Payment<select name="orderPayment" [(ngModel)]="orderForm.paymentStatus"><option *ngFor="let option of paymentOptions" [value]="option.value">{{ option.label }}</option></select></label>

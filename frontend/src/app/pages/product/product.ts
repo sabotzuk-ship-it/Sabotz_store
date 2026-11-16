@@ -3,7 +3,7 @@ import { StoreImage } from '../../shared/store-image/store-image';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Product, ProductPresentation } from '../../data/product.model';
+import { Product, ProductPresentation, ukShoeSizes } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
 import { SideNav } from '../../shared/side-nav/side-nav';
 import { SiteSettingsService } from '../../data/site-settings.service';
@@ -21,7 +21,7 @@ export class ProductPage implements OnInit {
   product?: Product;
   presentation: ProductPresentation = { collection: '', description: '' };
   selectedIndex = 0;
-  readonly ukSizes = Array.from({ length: 13 }, (_, index) => String(5 + index / 2));
+  readonly ukSizes = ukShoeSizes;
   selectedUkSize = '';
   isFootwear = false;
   error = '';
