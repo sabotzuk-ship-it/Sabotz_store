@@ -1,3 +1,5 @@
+export const ukShoeSizes = Array.from({ length: 13 }, (_, index) => String(5 + index / 2));
+
 export interface Product {
   id: string;
   nome: string;

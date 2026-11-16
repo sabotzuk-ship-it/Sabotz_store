@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminAuthService } from '../../data/admin-auth.service';
 import { CustomerOrder, DeliveryStatus, PaymentStatus } from '../../data/order.model';
-import { AdminProduct, Product } from '../../data/product.model';
+import { AdminProduct, Product, ukShoeSizes } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
 import { StoreCategory, SiteSettings, defaultSelectedProductSlugs, defaultSiteSettings } from '../../data/site-settings.model';
 import { SiteSettingsService } from '../../data/site-settings.service';
@@ -57,6 +57,7 @@ export class AdminPage implements OnInit, OnDestroy {
     { value: 'cancelled', label: 'Cancelled' }
   ];
   orderForm = this.emptyOrderForm();
+  readonly ukShoeSizes = ukShoeSizes;
   private pendingOrderId?: string;
   activeSection: 'products' | 'orders' | 'settings' | 'visitors' = 'products';
   photos: { url: string; file?: File }[] = [];
@@ -569,13 +570,31 @@ export class AdminPage implements OnInit, OnDestroy {
     }
   }
 
+  get orderProduct(): AdminProduct | undefined {
+    return this.products.find(product => product.id === this.orderForm.productId);
+  }
+
+  get orderProductUsesUkSize(): boolean {
+    const category = this.orderProduct?.categoria;
+    return category?.toLowerCase() === 'shoes' ||
+      this.settings.categories.some(entry => entry.id === 'shoes' && entry.name === category);
+  }
+
+  selectOrderProduct(productId: string): void {
+    this.orderForm.productId = productId;
+    this.orderForm.ukSize = '';
+  }
+
   async addOrder(): Promise<void> {
-    if (this.ordersBusy) return;
+    const { productId, ukSize, customerName, quantity, total, paymentStatus, deliveryStatus } = this.orderForm;
+    const product = this.orderProduct;
+    const itemName = product
+      ? product.nome + (this.orderProductUsesUkSize && ukSize ? ` · UK ${ukSize}` : '')
+      : this.orderForm.itemName.trim();
+    if (this.ordersBusy || !itemName || (productId !== ':manual' && !product)) return;
     this.pendingOrderId ??= crypto.randomUUID();
     const saved = await this.writeOrder('/api/admin/orders', 'POST', {
-      ...this.orderForm,
-      id: this.pendingOrderId,
-      total: this.orderForm.total ?? undefined
+      id: this.pendingOrderId, customerName, itemName, quantity, total: total ?? undefined, paymentStatus, deliveryStatus
     });
     if (saved) {
       this.orders = [saved, ...this.orders.filter(order => order.id !== saved.id)];
@@ -626,7 +645,7 @@ export class AdminPage implements OnInit, OnDestroy {
 
   private emptyOrderForm() {
     return {
-      customerName: '', itemName: '', quantity: 1, total: null as number | null,
+      customerName: '', productId: '', itemName: '', ukSize: '', quantity: 1, total: null as number | null,
       paymentStatus: 'awaiting-payment' as PaymentStatus, deliveryStatus: 'ordered' as DeliveryStatus
     };
   }
