@@ -21,6 +21,9 @@ export class ProductPage implements OnInit {
   product?: Product;
   presentation: ProductPresentation = { collection: '', description: '' };
   selectedIndex = 0;
+  readonly ukSizes = Array.from({ length: 18 }, (_, index) => String(3 + index / 2));
+  selectedUkSize = '';
+  isFootwear = false;
   error = '';
   backLink: string[] = ['/collection'];
   backLabel = 'COLLECTION';
@@ -40,6 +43,12 @@ export class ProductPage implements OnInit {
     return this.product?.fotos[this.selectedIndex] ?? '';
   }
 
+  get enquiryMessage(): string {
+    if (!this.product || (this.isFootwear && !this.selectedUkSize)) return '';
+    const { marca, nome } = this.product;
+    const size = this.isFootwear ? ` in UK ${this.selectedUkSize}` : '';
+    return `Hi SABOTZ! Is ${marca} — ${nome}${size} available?`;
+  }
 
   private async load(slug: string): Promise<void> {
     try {
@@ -49,6 +58,8 @@ export class ProductPage implements OnInit {
       ]);
       this.product = product;
       const category = settings.categories.find(item => item.name === product?.categoria);
+      this.isFootwear = category?.id === 'shoes' || product?.categoria.toLowerCase() === 'shoes';
+      this.selectedUkSize = '';
       this.backLink = category ? ['/categories', category.id] : ['/collection'];
       this.backLabel = category?.title || 'COLLECTION';
       this.presentation = this.products.presentationFor(slug, this.product?.marca);
