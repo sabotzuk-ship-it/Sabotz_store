@@ -14,6 +14,8 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.net.URI;
 import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.Locale;
@@ -23,6 +25,8 @@ import java.util.UUID;
 @RestController
 @DependsOnDatabaseInitialization
 class Catalogue implements InitializingBean {
+    private static final Set<String> PUBLIC_PRODUCT_FIELDS = Set.of(
+            "id", "nome", "marca", "status", "categoria", "preco", "discountPercent", "fotos", "pagina");
     private final JdbcTemplate db;
     private final ObjectMapper json;
     private final Photos photos;
@@ -57,6 +61,17 @@ class Catalogue implements InitializingBean {
 
     @GetMapping("/api/products")
     JsonNode products() throws IOException {
+        ArrayNode visible = json.createArrayNode();
+        for (JsonNode item : adminProducts()) {
+            ObjectNode product = ((ObjectNode) item).deepCopy();
+            product.retain(PUBLIC_PRODUCT_FIELDS);
+            visible.add(product);
+        }
+        return visible;
+    }
+
+    @GetMapping("/api/admin/products")
+    JsonNode adminProducts() throws IOException {
         return read("products", false);
     }
 
@@ -150,10 +165,49 @@ class Catalogue implements InitializingBean {
         }
         product.put("pagina", page);
         product.put("id", id == null ? UUID.randomUUID().toString() : id);
+        if (body.has("sourcing")) {
+            product.set("sourcing", validateSourcing(body.get("sourcing")));
+        } else if (index >= 0 && products.get(index).has("sourcing")) {
+            product.set("sourcing", products.get(index).get("sourcing"));
+        }
         if (index < 0) products.insert(0, product);
         else products.set(index, product);
         write("products", products);
         return products;
+    }
+
+    private ObjectNode validateSourcing(JsonNode input) {
+        if (!input.isObject()) throw bad("Check the supplier details.");
+        ObjectNode sourcing = json.createObjectNode();
+        JsonNode link = input.path("supplierUrl");
+        if (!link.isMissingNode()) {
+            String value = link.asText("").trim();
+            try {
+                URI uri = URI.create(value);
+                String scheme = uri.getScheme();
+                if (!link.isTextual() || value.length() > 2048 || uri.getHost() == null
+                        || uri.getRawUserInfo() != null
+                        || !("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme))) {
+                    throw new IllegalArgumentException();
+                }
+            } catch (IllegalArgumentException error) {
+                throw bad("Enter a valid HTTP or HTTPS supplier link.");
+            }
+            sourcing.put("supplierUrl", value);
+        }
+        for (String field : Set.of("itemCost", "shippingCost")) {
+            JsonNode amount = input.path(field);
+            if (amount.isMissingNode()) continue;
+            if (!amount.isNumber() || !Double.isFinite(amount.asDouble())) {
+                throw bad("Enter non-negative costs in GBP with up to two decimal places.");
+            }
+            BigDecimal cost = amount.decimalValue().stripTrailingZeros();
+            if (cost.signum() < 0 || cost.compareTo(BigDecimal.valueOf(10_000_000)) > 0 || cost.scale() > 2) {
+                throw bad("Enter non-negative costs in GBP with up to two decimal places.");
+            }
+            sourcing.set(field, amount);
+        }
+        return sourcing;
     }
 
     @PutMapping("/api/admin/site-settings")
