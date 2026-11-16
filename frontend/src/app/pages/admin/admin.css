@@ -45,6 +45,11 @@ button:disabled { opacity: .55; cursor: wait; }
 button.secondary { background: #333; color: #fff; }
 button.danger { background: #6e2424; color: white; }
 .actions { display: flex; gap: 9px; margin-top: 16px; }
+.sourcing { min-width: 0; margin: 20px 0 0; padding: 12px; border: 1px solid #383838; border-radius: 8px; }
+.sourcing legend { padding: 0 5px; font-size: .85rem; font-weight: 600; }
+.sourcing-summary { display: grid; gap: 5px; margin-top: 12px; font-size: .85rem; }
+.sourcing-summary .error { margin: 0; }
+.supplier-link { align-self: center; color: inherit; font-size: .85rem; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 0; border-bottom: 1px solid #333; }
 .row small { display: block; color: #aaa; margin-top: 5px; }
 .catalogue-item { display: flex; align-items: center; gap: 14px; min-width: 0; overflow-wrap: anywhere; }
