@@ -5,7 +5,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SiteSettingsService } from '../../data/site-settings.service';
-import { defaultSiteSettings, SiteSettings } from '../../data/site-settings.model';
+import { defaultSelectedProductSlugs, defaultSiteSettings, SiteSettings } from '../../data/site-settings.model';
 import { SideNav } from '../../shared/side-nav/side-nav';
 import { Product } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
@@ -46,10 +46,10 @@ export class HomePage implements OnInit {
   }
 
   get selectedProducts(): Product[] {
-    // Initial editorial selection; missing or unpublished products are omitted.
-    const slugs = ['jordan-olive', 'glasses-oakley-purple', 'air-force-1-burgundy'];
-    return slugs.flatMap(slug => {
-      const product = this.availableProducts.find(item => this.productService.slugFor(item) === slug);
+    const available = this.availableProducts;
+    const ids = this.settings.selectedProductIds;
+    return (ids ?? defaultSelectedProductSlugs).flatMap(key => {
+      const product = available.find(item => (ids ? item.id : this.productService.slugFor(item)) === key);
       return product ? [product] : [];
     });
   }
