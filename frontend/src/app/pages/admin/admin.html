@@ -197,7 +197,16 @@
         <article class="order-card" *ngFor="let order of filteredOrders">
           <div class="order-top"><div><strong>Order {{ order.status === 'manual' ? order.id.slice(0, 8).toUpperCase() : order.id }}</strong><small>{{ formatOrderDate(order.createdAt) }}</small></div><span class="order-status" *ngIf="order.status !== 'manual'">{{ order.status }}</span></div>
           <div class="order-customer"><strong>{{ order.customerName }}</strong><span *ngIf="order.email">{{ order.email }}</span><span *ngIf="order.phone">{{ order.phone }}</span></div>
-          <ul><li *ngFor="let item of order.items">{{ item.quantity }} × {{ item.name }}<span *ngIf="item.unitPrice !== undefined">{{ formatPrice(item.unitPrice * item.quantity) }}</span></li></ul>
+          <ul class="order-items">
+            <li *ngFor="let item of order.items">
+              @if (orderItemPhoto(item.name); as photo) {
+                <img class="order-item-photo" [storeImage]="photoUrl(photo)" [storeImageWidth]="160"
+                  width="60" height="60" loading="lazy" alt="">
+              }
+              <span>{{ item.quantity }} × {{ item.name }}</span>
+              <span class="order-item-price" *ngIf="item.unitPrice !== undefined">{{ formatPrice(item.unitPrice * item.quantity) }}</span>
+            </li>
+          </ul>
           <div class="order-total" *ngIf="order.total !== undefined">Total <strong>{{ formatPrice(order.total) }}</strong></div>
           <div class="grid">
             <label>Payment<select [ngModel]="order.paymentStatus ?? ''" [disabled]="ordersBusy" (ngModelChange)="changeOrderStatus(order, 'paymentStatus', $event)">

@@ -574,6 +574,13 @@ export class AdminPage implements OnInit, OnDestroy {
     return this.products.find(product => product.id === this.orderForm.productId);
   }
 
+  orderItemPhoto(itemName: string): string | undefined {
+    const exact = this.products.find(product => product.nome === itemName);
+    return (exact ?? this.products.find(product =>
+      product.nome === itemName.replace(/ · UK \d+(?:\.5)?$/, '')
+    ))?.fotos[0];
+  }
+
   get orderProductUsesUkSize(): boolean {
     const category = this.orderProduct?.categoria;
     return category?.toLowerCase() === 'shoes' ||
