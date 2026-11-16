@@ -8,7 +8,7 @@ import { AdminAuthService } from '../../data/admin-auth.service';
 import { CustomerOrder } from '../../data/order.model';
 import { AdminProduct, Product } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
-import { StoreCategory, SiteSettings, defaultSiteSettings } from '../../data/site-settings.model';
+import { StoreCategory, SiteSettings, defaultSelectedProductSlugs, defaultSiteSettings } from '../../data/site-settings.model';
 import { SiteSettingsService } from '../../data/site-settings.service';
 import { VisitorReport } from './visitor-report/visitor-report';
 
@@ -33,6 +33,8 @@ export class AdminPage implements OnInit, OnDestroy {
   settingsSaved = false;
   categoryPendingDelete?: StoreCategory;
   settings: SiteSettings = structuredClone(defaultSiteSettings);
+  readonly selectedPiecePositions = [0, 1, 2];
+  private selectedPieceDraft?: string[];
   newCategory: { name: string; subtitle: string; image: string; comingSoon: boolean; imageFile?: File; imagePreview?: string } = {
     name: '', subtitle: '', image: 'accessories.jpg', comingSoon: true
   };
@@ -95,6 +97,7 @@ export class AdminPage implements OnInit, OnDestroy {
       this.orders = [];
       this.releaseCategoryPreviews();
       this.settings = structuredClone(defaultSiteSettings);
+      this.selectedPieceDraft = undefined;
       this.cancelEdit();
       this.changeDetector.markForCheck();
     }
@@ -289,6 +292,27 @@ export class AdminPage implements OnInit, OnDestroy {
     this.settingsError = '';
   }
 
+  get selectablePieces(): AdminProduct[] {
+    const categories = new Set(this.settings.categories.filter(category => !category.comingSoon).map(category => category.name));
+    return this.products.filter(product => categories.has(product.categoria));
+  }
+
+  get selectedPieceIds(): string[] {
+    const ids = this.selectedPieceDraft ?? this.settings.selectedProductIds ?? defaultSelectedProductSlugs.map(slug =>
+      this.products.find(product => this.productService.slugFor(product) === slug)?.id ?? '');
+    const available = new Set(this.selectablePieces.map(product => product.id));
+    return this.selectedPiecePositions.map(position => available.has(ids[position]) ? ids[position] : '');
+  }
+
+  setSelectedPiece(position: number, id: string): void {
+    const ids = this.selectedPieceIds;
+    const previousPosition = id ? ids.indexOf(id) : -1;
+    if (previousPosition !== -1) ids[previousPosition] = ids[position];
+    ids[position] = id;
+    this.selectedPieceDraft = ids;
+    this.settingsSaved = false;
+  }
+
   async saveSiteSettings(): Promise<void> {
     this.busy = true;
     this.settingsError = '';
@@ -299,6 +323,7 @@ export class AdminPage implements OnInit, OnDestroy {
       const uploadedImages = files.length ? await this.productService.uploadProductImages(files) : [];
       let uploadIndex = 0;
       const settingsToSave: SiteSettings = {
+        selectedProductIds: this.selectedPieceDraft ? this.selectedPieceIds.filter(Boolean) : undefined,
         categories: categories.map(category => ({
           id: category.id,
           name: category.name,
@@ -313,6 +338,7 @@ export class AdminPage implements OnInit, OnDestroy {
         if (category.imagePreview) URL.revokeObjectURL(category.imagePreview);
       });
       this.settings = savedSettings;
+      this.selectedPieceDraft = undefined;
       this.settingsSaved = true;
     } catch (error) {
       this.settingsError = error instanceof Error ? error.message : 'Could not save site settings.';

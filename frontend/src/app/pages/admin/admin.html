@@ -167,10 +167,29 @@
     </section>
 
     <section class="panel" *ngIf="activeSection === 'settings'">
-      <h2>Category display</h2>
-      <p class="muted settings-description">Add or remove store categories and manage the “COMING SOON” badge.</p>
       <p class="error" *ngIf="settingsError">{{ settingsError }}</p>
       <p class="settings-success" *ngIf="settingsSaved">Settings saved. The home page is now updated.</p>
+      <section class="selected-pieces-settings">
+        <h2>The Selected Pieces</h2>
+        <p class="muted settings-description">Choose up to three products in the order they should appear on the home page.</p>
+        @let selectedIds = selectedPieceIds;
+        @let choices = selectablePieces;
+        <div class="grid">
+          @for (position of selectedPiecePositions; track position) {
+            <label>Position {{ position + 1 }}
+              <select [ngModel]="selectedIds[position]" (ngModelChange)="setSelectedPiece(position, $event)" [disabled]="busy || !products.length">
+                <option value="">No product</option>
+                @for (product of choices; track product.id) {
+                  <option [value]="product.id">{{ product.marca }} · {{ product.nome }}</option>
+                }
+              </select>
+            </label>
+          }
+        </div>
+        <button type="button" [disabled]="busy || !products.length" (click)="saveSiteSettings()">Save selected pieces</button>
+      </section>
+      <h2>Category display</h2>
+      <p class="muted settings-description">Add or remove store categories and manage the "COMING SOON" badge.</p>
       <div class="category-setting" *ngFor="let category of settings.categories">
         <div class="category-fields">
           <label>Title<input [name]="'categoryTitle-' + category.id" [(ngModel)]="category.title" maxlength="80" (input)="settingsSaved = false"></label>

@@ -241,6 +241,22 @@ class Catalogue implements InitializingBean {
             }
             if (!found) throw conflict("Move or remove the products from a category before deleting or renaming it.");
         }
+        if (body.has("selectedProductIds")) {
+            JsonNode selection = body.path("selectedProductIds");
+            if (!selection.isArray() || selection.size() > 3) throw bad("Choose up to three products.");
+            Set<String> availableIds = new HashSet<>();
+            for (JsonNode product : products) availableIds.add(product.path("id").asText());
+            Set<String> selectedIds = new HashSet<>();
+            for (JsonNode id : selection) {
+                if (!id.isTextual() || !availableIds.contains(id.textValue()) || !selectedIds.add(id.textValue())) {
+                    throw bad("Choose distinct products from the catalogue.");
+                }
+            }
+            settings.set("selectedProductIds", selection);
+        } else {
+            JsonNode selection = read("settings", true).get("selectedProductIds");
+            if (selection != null) settings.set("selectedProductIds", selection);
+        }
         write("settings", settings);
         return settings;
     }

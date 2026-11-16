@@ -11,7 +11,10 @@ export interface StoreCategory {
 
 export interface SiteSettings {
   categories: StoreCategory[];
+  selectedProductIds?: string[];
 }
+
+export const defaultSelectedProductSlugs = ['jordan-olive', 'glasses-oakley-purple', 'air-force-1-burgundy'];
 
 export const defaultSiteSettings: SiteSettings = {
   categories: [
