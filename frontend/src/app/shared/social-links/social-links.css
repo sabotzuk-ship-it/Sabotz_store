@@ -14,3 +14,6 @@ a:active { background: #292929; border-color: #aaa; }
 .compact .social-label, .compact .social-arrow { display: none; }
 @media (hover: hover) and (pointer: fine) { a:hover { background: #f1f0ec; color: #111; border-color: #f1f0ec; box-shadow: 0 8px 28px #0002; } a:hover .social-arrow { transform: translate(3px,-3px); } }
 @media (max-width: 600px) { .social-links { gap: 10px; } a { gap: 9px; padding: 15px 12px; min-height: 64px; } .social-label { font-size: 9px; letter-spacing: .8px; } .social-icon { width: 23px; height: 23px; } .compact { gap: 6px; } }
+
+a[aria-disabled="true"] { opacity: .45; cursor: default; }
+textarea { box-sizing: border-box; width: 100%; padding: 8px; color: inherit; background: #171717; border: 1px solid #777; }

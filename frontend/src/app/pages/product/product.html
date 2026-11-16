@@ -18,7 +18,19 @@
       <h1>{{ item.nome }}</h1>
       <p class="price" *ngIf="item.preco !== undefined"><app-product-price [price]="item.preco" [discount]="item.discountPercent"></app-product-price></p>
       <span class="status">{{ item.status }}</span>
-      <div class="contacts"><app-social-links /></div>
+      @if (isFootwear) {
+        <div class="size-picker">
+          <label for="uk-size">UK shoe size</label>
+          <select id="uk-size" #size [value]="selectedUkSize" (change)="selectedUkSize = size.value" aria-describedby="size-note">
+            <option value="">Select a size</option>
+            @for (ukSize of ukSizes; track ukSize) {
+              <option [value]="ukSize">UK {{ ukSize }}</option>
+            }
+          </select>
+          <p id="size-note">Select your size to ask about availability.</p>
+        </div>
+      }
+      <div class="contacts"><app-social-links [message]="enquiryMessage" [requireMessage]="isFootwear" /></div>
       <p class="description">{{ presentation.description }}</p>
     </section>
   </main>
