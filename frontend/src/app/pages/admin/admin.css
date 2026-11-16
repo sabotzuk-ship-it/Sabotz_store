@@ -50,6 +50,9 @@ button.danger { background: #6e2424; color: white; }
 .sourcing-summary { display: grid; gap: 5px; margin-top: 12px; font-size: .85rem; }
 .sourcing-summary .error { margin: 0; }
 .supplier-link { align-self: center; color: inherit; font-size: .85rem; }
+.selected-pieces-settings { margin: 0 0 24px; padding-bottom: 20px; border-bottom: 1px solid #333; }
+.selected-pieces-settings select { display: block; margin-top: 6px; }
+.selected-pieces-settings button { margin-top: 10px; }
 .row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 0; border-bottom: 1px solid #333; }
 .row small { display: block; color: #aaa; margin-top: 5px; }
 .catalogue-item { display: flex; align-items: center; gap: 14px; min-width: 0; overflow-wrap: anywhere; }
