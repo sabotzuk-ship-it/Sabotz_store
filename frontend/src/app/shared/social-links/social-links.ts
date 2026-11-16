@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, signal } from '@angular/core';
 
 @Component({
   selector: 'app-social-links',
@@ -11,10 +11,10 @@ export class SocialLinks implements OnChanges {
   @Input() stacked = false;
   @Input() message = '';
   @Input() requireMessage = false;
-  copyStatus = '';
+  readonly copyStatus = signal('');
 
   ngOnChanges(): void {
-    this.copyStatus = '';
+    this.copyStatus.set('');
   }
 
   get whatsappHref(): string | null {
@@ -32,9 +32,9 @@ export class SocialLinks implements OnChanges {
     if (!message) return;
     try {
       await navigator.clipboard.writeText(message);
-      if (this.message === message) this.copyStatus = 'Message copied. Paste it into your Instagram DM.';
+      if (this.message === message) this.copyStatus.set('Message copied. Paste it into your Instagram DM.');
     } catch {
-      if (this.message === message) this.copyStatus = 'Copy the message below and paste it into your Instagram DM.';
+      if (this.message === message) this.copyStatus.set('Select and copy the message below, then paste it into your Instagram DM.');
     }
   }
 }

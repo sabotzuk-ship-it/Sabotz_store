@@ -17,3 +17,5 @@ a:active { background: #292929; border-color: #aaa; }
 
 a[aria-disabled="true"] { opacity: .45; cursor: default; }
 textarea { box-sizing: border-box; width: 100%; padding: 8px; color: inherit; background: #171717; border: 1px solid #777; }
+.instagram-copy { margin-top: 12px; font-size: 13px; }
+.instagram-copy button { border: 1px solid #777; padding: 10px 12px; background: #171717; color: inherit; cursor: pointer; }

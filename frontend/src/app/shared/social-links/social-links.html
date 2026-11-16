@@ -8,7 +8,12 @@
     <span class="social-label">INSTAGRAM</span><span class="social-arrow" aria-hidden="true"><svg class="icon-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19 19 5M5 5h14v14"/></svg></span>
   </a>
 </nav>
-@if (message && copyStatus) {
-  <p role="status">{{ copyStatus }}</p>
-  <textarea aria-label="Instagram enquiry message" readonly rows="3" [value]="message"></textarea>
+@if (message) {
+  <div class="instagram-copy">
+    <button type="button" (click)="copyInstagramMessage()">Copy message for Instagram</button>
+    @if (copyStatus()) {
+      <p role="status">{{ copyStatus() }}</p>
+      <textarea aria-label="Instagram enquiry message" readonly rows="3" [value]="message"></textarea>
+    }
+  </div>
 }
