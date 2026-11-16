@@ -50,6 +50,12 @@ button.danger { background: #6e2424; color: white; }
 .sourcing-summary { display: grid; gap: 5px; margin-top: 12px; font-size: .85rem; }
 .sourcing-summary .error { margin: 0; }
 .supplier-link { align-self: center; color: inherit; font-size: .85rem; }
+.order-editor { padding: 18px; margin: 18px 0; border: 1px solid #333; border-radius: 10px; }
+.order-editor h3 { margin: 0 0 14px; font-size: 16px; }
+.order-editor button { margin-top: 10px; }
+.order-editor input, .order-editor select, .orders-toolbar select, .order-card select { display: block; margin-top: 6px; }
+.orders-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 14px; }
+.orders-toolbar label { margin: 0; min-width: min(100%, 220px); }
 .selected-pieces-settings { margin: 0 0 24px; padding-bottom: 20px; border-bottom: 1px solid #333; }
 .selected-pieces-settings select { display: block; margin-top: 6px; }
 .selected-pieces-settings button { margin-top: 10px; }

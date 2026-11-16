@@ -150,18 +150,49 @@
     <app-visitor-report *ngIf="activeSection === 'visitors'" [products]="products" [categories]="settings.categories" />
 
     <section class="panel" *ngIf="activeSection === 'orders'">
-      <div class="orders-heading"><div><h2>Customer orders</h2><p class="muted">Orders received and stored by the shop.</p></div><button type="button" class="secondary" (click)="loadOrders()">Refresh</button></div>
-      <p class="error" *ngIf="ordersError">{{ ordersError }}</p>
-      <div class="orders-empty" *ngIf="!orders.length">
-        <strong>No orders yet</strong>
-        <p>Checkout is not connected yet. Orders will appear here once a sales integration has been configured.</p>
+      <div class="orders-heading"><h2>Customer orders</h2><button type="button" class="secondary" [disabled]="ordersBusy" (click)="loadOrders()">Refresh</button></div>
+      <p class="error" role="alert" *ngIf="ordersError">{{ ordersError }}</p>
+      <p class="settings-success" role="status" *ngIf="orderNotice">{{ orderNotice }}</p>
+      <form class="order-editor" #manualOrder="ngForm" (ngSubmit)="addOrder()">
+        <h3>Add an order</h3>
+        <div class="grid">
+          <label>Customer name or handle<input name="orderCustomer" [(ngModel)]="orderForm.customerName" maxlength="120" required></label>
+          <label>Product and size<input name="orderItem" [(ngModel)]="orderForm.itemName" maxlength="160" required></label>
+          <label>Quantity<input name="orderQuantity" [(ngModel)]="orderForm.quantity" type="number" min="1" max="99" step="1" required></label>
+          <label>Total (£)<input name="orderTotal" [(ngModel)]="orderForm.total" type="number" min="0" max="1000000" step="0.01"></label>
+          <label>Payment<select name="orderPayment" [(ngModel)]="orderForm.paymentStatus"><option *ngFor="let option of paymentOptions" [value]="option.value">{{ option.label }}</option></select></label>
+          <label>Delivery<select name="orderDelivery" [(ngModel)]="orderForm.deliveryStatus"><option *ngFor="let option of deliveryOptions" [value]="option.value">{{ option.label }}</option></select></label>
+        </div>
+        <button type="submit" [disabled]="ordersBusy || manualOrder.invalid">Add order</button>
+      </form>
+      <div class="orders-toolbar" *ngIf="orders.length">
+        <label>Filter orders<select [(ngModel)]="orderFilter">
+          <option value="all">All orders</option>
+          <option value="awaiting-payment">Awaiting payment</option>
+          <option *ngFor="let option of deliveryOptions" [value]="option.value">{{ option.label }}</option>
+        </select></label>
+        <button type="button" class="secondary" *ngIf="incomingCount" (click)="copyIncomingStory()">Copy Story caption · {{ incomingCount }} arriving</button>
       </div>
-      <div class="orders-list" *ngIf="orders.length">
-        <article class="order-card" *ngFor="let order of orders">
-          <div class="order-top"><div><strong>Order {{ order.id }}</strong><small>{{ formatOrderDate(order.createdAt) }}</small></div><span class="order-status">{{ order.status }}</span></div>
+      <div class="orders-empty" *ngIf="!filteredOrders.length && !ordersBusy">
+        <strong>{{ orders.length ? 'No orders match this filter' : 'No orders yet' }}</strong>
+        <p *ngIf="!orders.length">Add an order to track its payment and delivery.</p>
+      </div>
+      <div class="orders-list" *ngIf="filteredOrders.length">
+        <article class="order-card" *ngFor="let order of filteredOrders">
+          <div class="order-top"><div><strong>Order {{ order.status === 'manual' ? order.id.slice(0, 8).toUpperCase() : order.id }}</strong><small>{{ formatOrderDate(order.createdAt) }}</small></div><span class="order-status" *ngIf="order.status !== 'manual'">{{ order.status }}</span></div>
           <div class="order-customer"><strong>{{ order.customerName }}</strong><span *ngIf="order.email">{{ order.email }}</span><span *ngIf="order.phone">{{ order.phone }}</span></div>
           <ul><li *ngFor="let item of order.items">{{ item.quantity }} × {{ item.name }}<span *ngIf="item.unitPrice !== undefined">{{ formatPrice(item.unitPrice * item.quantity) }}</span></li></ul>
           <div class="order-total" *ngIf="order.total !== undefined">Total <strong>{{ formatPrice(order.total) }}</strong></div>
+          <div class="grid">
+            <label>Payment<select [ngModel]="order.paymentStatus ?? ''" [disabled]="ordersBusy" (ngModelChange)="changeOrderStatus(order, 'paymentStatus', $event)">
+              <option value="" disabled>Not set</option>
+              <option *ngFor="let option of paymentOptions" [value]="option.value">{{ option.label }}</option>
+            </select></label>
+            <label>Delivery<select [ngModel]="order.deliveryStatus ?? ''" [disabled]="ordersBusy" (ngModelChange)="changeOrderStatus(order, 'deliveryStatus', $event)">
+              <option value="" disabled>Not set</option>
+              <option *ngFor="let option of deliveryOptions" [value]="option.value">{{ option.label }}</option>
+            </select></label>
+          </div>
         </article>
       </div>
     </section>

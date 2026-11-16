@@ -5,7 +5,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminAuthService } from '../../data/admin-auth.service';
-import { CustomerOrder } from '../../data/order.model';
+import { CustomerOrder, DeliveryStatus, PaymentStatus } from '../../data/order.model';
 import { AdminProduct, Product } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
 import { StoreCategory, SiteSettings, defaultSelectedProductSlugs, defaultSiteSettings } from '../../data/site-settings.model';
@@ -42,6 +42,22 @@ export class AdminPage implements OnInit, OnDestroy {
   catalogueCategory = '';
   catalogueSearch = '';
   orders: CustomerOrder[] = [];
+  ordersBusy = false;
+  orderNotice = '';
+  orderFilter: 'all' | 'awaiting-payment' | DeliveryStatus = 'all';
+  readonly paymentOptions: { value: PaymentStatus; label: string }[] = [
+    { value: 'awaiting-payment', label: 'Awaiting payment' }, { value: 'paid', label: 'Paid' }
+  ];
+  readonly deliveryOptions: { value: DeliveryStatus; label: string }[] = [
+    { value: 'ordered', label: 'Order placed' },
+    { value: 'awaiting-arrival', label: 'Awaiting supplier delivery' },
+    { value: 'ready', label: 'Ready to dispatch' },
+    { value: 'shipped', label: 'Dispatched' },
+    { value: 'delivered', label: 'Delivered' },
+    { value: 'cancelled', label: 'Cancelled' }
+  ];
+  orderForm = this.emptyOrderForm();
+  private pendingOrderId?: string;
   activeSection: 'products' | 'orders' | 'settings' | 'visitors' = 'products';
   photos: { url: string; file?: File }[] = [];
   selectedPreviewIndex = 0;
@@ -95,6 +111,10 @@ export class AdminPage implements OnInit, OnDestroy {
       this.loggedIn = false;
       this.products = [];
       this.orders = [];
+      this.orderForm = this.emptyOrderForm();
+      this.pendingOrderId = undefined;
+      this.orderFilter = 'all';
+      this.orderNotice = '';
       this.releaseCategoryPreviews();
       this.settings = structuredClone(defaultSiteSettings);
       this.selectedPieceDraft = undefined;
@@ -507,17 +527,108 @@ export class AdminPage implements OnInit, OnDestroy {
   }
 
   async loadOrders(): Promise<void> {
+    if (this.ordersBusy) return;
+    this.ordersBusy = true;
     try {
       const response = await fetch('/api/admin/orders', { credentials: 'same-origin', cache: 'no-store' });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body.error || 'Could not load customer orders.');
-      this.orders = (Array.isArray(body) ? body : []) as CustomerOrder[];
+      if (!Array.isArray(body)) throw new Error('The orders server is unavailable.');
+      if (this.loggedIn) this.orders = body as CustomerOrder[];
       this.ordersError = '';
     } catch (error) {
       this.ordersError = error instanceof Error ? error.message : 'Could not load customer orders.';
     } finally {
+      this.ordersBusy = false;
       this.changeDetector.markForCheck();
     }
+  }
+
+  get filteredOrders(): CustomerOrder[] {
+    if (this.orderFilter === 'all') return this.orders;
+    if (this.orderFilter === 'awaiting-payment') {
+      return this.orders.filter(order => order.paymentStatus === 'awaiting-payment' && order.deliveryStatus !== 'cancelled');
+    }
+    return this.orders.filter(order => order.deliveryStatus === this.orderFilter);
+  }
+
+  get incomingCount(): number {
+    return this.orders.filter(order => order.deliveryStatus === 'awaiting-arrival').length;
+  }
+
+  async copyIncomingStory(): Promise<void> {
+    const count = this.incomingCount;
+    if (!count) return;
+    try {
+      await navigator.clipboard.writeText(count === 1 ? '1 pedido SABOTZ a caminho! 📦' : `${count} pedidos SABOTZ a caminho! 📦`);
+      this.orderNotice = 'Story caption copied.';
+    } catch {
+      this.ordersError = 'Could not copy the Story caption.';
+    } finally {
+      this.changeDetector.markForCheck();
+    }
+  }
+
+  async addOrder(): Promise<void> {
+    if (this.ordersBusy) return;
+    this.pendingOrderId ??= crypto.randomUUID();
+    const saved = await this.writeOrder('/api/admin/orders', 'POST', {
+      ...this.orderForm,
+      id: this.pendingOrderId,
+      total: this.orderForm.total ?? undefined
+    });
+    if (saved) {
+      this.orders = [saved, ...this.orders.filter(order => order.id !== saved.id)];
+      this.orderForm = this.emptyOrderForm();
+      this.pendingOrderId = undefined;
+      this.orderFilter = 'all';
+      this.orderNotice = 'Order added.';
+      this.changeDetector.markForCheck();
+    }
+  }
+
+  async changeOrderStatus(order: CustomerOrder, field: 'paymentStatus' | 'deliveryStatus', value: string): Promise<void> {
+    const saved = await this.writeOrder(`/api/admin/orders/${encodeURIComponent(order.id)}`, 'PATCH', { [field]: value });
+    if (saved) {
+      this.orders = this.orders.map(current => current.id === saved.id ? saved : current);
+      this.orderNotice = 'Order status saved.';
+    } else {
+      // Replace the object so the status controls reset to the stored values.
+      this.orders = this.orders.map(current => current.id === order.id ? { ...current } : current);
+    }
+    this.changeDetector.markForCheck();
+  }
+
+  private async writeOrder(url: string, method: 'POST' | 'PATCH', input: object): Promise<CustomerOrder | undefined> {
+    if (this.ordersBusy) return;
+    this.ordersBusy = true;
+    this.ordersError = '';
+    this.orderNotice = '';
+    try {
+      const response = await fetch(url, {
+        method,
+        credentials: 'same-origin',
+        headers: this.productService.mutationHeaders(),
+        body: JSON.stringify(input),
+        signal: AbortSignal.timeout(15000)
+      });
+      const order = await response.json().catch(() => ({}));
+      if (!response.ok || typeof order.id !== 'string') throw new Error(order.error || 'Could not save the order.');
+      return this.loggedIn ? order as CustomerOrder : undefined;
+    } catch (error) {
+      this.ordersError = error instanceof Error ? error.message : 'Could not save the order.';
+      return undefined;
+    } finally {
+      this.ordersBusy = false;
+      this.changeDetector.markForCheck();
+    }
+  }
+
+  private emptyOrderForm() {
+    return {
+      customerName: '', itemName: '', quantity: 1, total: null as number | null,
+      paymentStatus: 'awaiting-payment' as PaymentStatus, deliveryStatus: 'ordered' as DeliveryStatus
+    };
   }
 
   private async loadSiteSettings(): Promise<void> {
