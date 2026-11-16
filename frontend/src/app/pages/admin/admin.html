@@ -153,8 +153,9 @@
       <div class="orders-heading"><h2>Customer orders</h2><button type="button" class="secondary" [disabled]="ordersBusy" (click)="loadOrders()">Refresh</button></div>
       <p class="error" role="alert" *ngIf="ordersError">{{ ordersError }}</p>
       <p class="settings-success" role="status" *ngIf="orderNotice">{{ orderNotice }}</p>
-      <form class="order-editor" #manualOrder="ngForm" (ngSubmit)="addOrder()">
-        <h3>Add an order</h3>
+      <details class="order-editor">
+        <summary>Add an order</summary>
+        <form #manualOrder="ngForm" (ngSubmit)="addOrder()">
         <div class="grid">
           <label>Customer name or handle<input name="orderCustomer" [(ngModel)]="orderForm.customerName" maxlength="120" required></label>
           <label>Product
@@ -180,7 +181,8 @@
           <label>Delivery<select name="orderDelivery" [(ngModel)]="orderForm.deliveryStatus"><option *ngFor="let option of deliveryOptions" [value]="option.value">{{ option.label }}</option></select></label>
         </div>
         <button type="submit" [disabled]="ordersBusy || manualOrder.invalid">Add order</button>
-      </form>
+        </form>
+      </details>
       <div class="orders-toolbar" *ngIf="orders.length">
         <label>Filter orders<select [(ngModel)]="orderFilter">
           <option value="all">All orders</option>

@@ -50,12 +50,18 @@ button.danger { background: #6e2424; color: white; }
 .sourcing-summary { display: grid; gap: 5px; margin-top: 12px; font-size: .85rem; }
 .sourcing-summary .error { margin: 0; }
 .supplier-link { align-self: center; color: inherit; font-size: .85rem; }
-.order-editor { padding: 18px; margin: 18px 0; border: 1px solid #333; border-radius: 10px; }
-.order-editor h3 { margin: 0 0 14px; font-size: 16px; }
+.order-editor { margin: 14px 0; border: 1px solid #333; border-radius: 8px; }
+.order-editor summary { padding: 12px 14px; cursor: pointer; font-weight: 700; }
+.order-editor form { padding: 0 14px 14px; }
 .order-editor button { margin-top: 10px; }
 .order-editor input, .order-editor select, .orders-toolbar select, .order-card select { display: block; margin-top: 6px; }
-.order-items li { display: flex; align-items: center; gap: 12px; }
-.order-item-photo { flex: 0 0 60px; object-fit: cover; border-radius: 6px; background: #1d1d1d; }
+.orders-list { gap: 8px; }
+.order-card { padding: 12px 14px; }
+.order-card .order-customer { margin-top: 8px; }
+.order-card .order-items { margin: 6px 0; }
+.order-card .order-items li { display: flex; align-items: center; justify-content: flex-start; gap: 10px; padding: 6px 0; }
+.order-item-photo { width: 48px; height: 48px; flex: 0 0 48px; object-fit: cover; border-radius: 6px; background: #1d1d1d; }
+.order-card .order-total { padding: 4px 0; }
 .order-item-price { margin-left: auto; }
 .orders-toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 14px; }
 .orders-toolbar label { margin: 0; min-width: min(100%, 220px); }
