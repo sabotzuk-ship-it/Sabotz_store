@@ -29,7 +29,7 @@ export class ProductPrice {
     const discount = this.discount();
     if (!price || !discount || !Number.isInteger(discount) || discount < 1 || discount > 100) return '';
     const pence = Math.round(price * 100);
-    const salePence = Math.round(pence * (100 - discount) / 100);
+    const salePence = this.products.salePriceInPence(price, discount);
     return salePence < pence ? this.products.formatPrice(salePence / 100) : '';
   });
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Product, ProductCatalog, ProductPresentation } from './product.model';
+import { AdminProduct, Product, ProductCatalog, ProductPresentation } from './product.model';
 import { readPublicStoreData } from './public-store-data';
 
 const presentations: Record<string, ProductPresentation> = {
@@ -19,6 +19,10 @@ export class ProductService {
   formatPrice(price?: number): string {
     if (price === undefined || !Number.isFinite(price)) return '';
     return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(price);
+  }
+
+  salePriceInPence(price: number, discount: number): number {
+    return Math.round(Math.round(price * 100) * (100 - discount) / 100);
   }
 
   getProducts(): Promise<Product[]> {
@@ -53,14 +57,18 @@ export class ProductService {
     return product.pagina.replace(/^products\//, '').replace(/\.html$/, '');
   }
 
-  async saveProduct(product: Omit<Product, 'pagina'> & { pagina?: string }, isEditing: boolean): Promise<Product[]> {
+  getAdminProducts(): Promise<AdminProduct[]> {
+    return this.request('/api/admin/products', { cache: 'no-store' });
+  }
+
+  async saveProduct(product: Omit<AdminProduct, 'pagina'> & { pagina?: string }, isEditing: boolean): Promise<AdminProduct[]> {
     const endpoint = isEditing ? `/api/admin/products/${encodeURIComponent(product.id)}` : '/api/admin/products';
-    const savedProducts = await this.request<Product[]>(endpoint, {
+    const savedProducts = await this.request<AdminProduct[]>(endpoint, {
       method: isEditing ? 'PUT' : 'POST',
       headers: this.mutationHeaders(),
       body: JSON.stringify(product)
     });
-    this.catalogPromise = Promise.resolve(savedProducts);
+    this.catalogPromise = undefined;
     return savedProducts;
   }
 
@@ -79,12 +87,12 @@ export class ProductService {
     return result.fotos ?? [];
   }
 
-  async removeProduct(id: string): Promise<Product[]> {
-    const products = await this.request<Product[]>(`/api/admin/products/${encodeURIComponent(id)}`, {
+  async removeProduct(id: string): Promise<AdminProduct[]> {
+    const products = await this.request<AdminProduct[]>(`/api/admin/products/${encodeURIComponent(id)}`, {
       method: 'DELETE',
       headers: this.mutationHeaders()
     });
-    this.catalogPromise = Promise.resolve(products);
+    this.catalogPromise = undefined;
     return products;
   }
 

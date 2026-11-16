@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AdminAuthService } from '../../data/admin-auth.service';
 import { CustomerOrder } from '../../data/order.model';
-import { Product } from '../../data/product.model';
+import { AdminProduct, Product } from '../../data/product.model';
 import { ProductService } from '../../data/product.service';
 import { StoreCategory, SiteSettings, defaultSiteSettings } from '../../data/site-settings.model';
 import { SiteSettingsService } from '../../data/site-settings.service';
@@ -36,7 +36,7 @@ export class AdminPage implements OnInit, OnDestroy {
   newCategory: { name: string; subtitle: string; image: string; comingSoon: boolean; imageFile?: File; imagePreview?: string } = {
     name: '', subtitle: '', image: 'accessories.jpg', comingSoon: true
   };
-  products: Product[] = [];
+  products: AdminProduct[] = [];
   catalogueCategory = '';
   catalogueSearch = '';
   orders: CustomerOrder[] = [];
@@ -109,7 +109,7 @@ export class AdminPage implements OnInit, OnDestroy {
     return /^https?:\/\//i.test(photo) || photo.startsWith('/') ? photo : `/${photo}`;
   }
 
-  get catalogueProducts(): Product[] {
+  get catalogueProducts(): AdminProduct[] {
     const search = this.catalogueSearch.trim().toLowerCase();
     return this.products.filter(product =>
       (!this.catalogueCategory || product.categoria === this.catalogueCategory) &&
@@ -346,7 +346,7 @@ export class AdminPage implements OnInit, OnDestroy {
     this.changeDetector.markForCheck();
   }
 
-  edit(product: Product): void {
+  edit(product: AdminProduct): void {
     this.clearSelectedImages();
     this.selectedPreviewIndex = 0;
     this.editingId = product.id;
@@ -356,10 +356,38 @@ export class AdminPage implements OnInit, OnDestroy {
       status: product.status,
       category: product.categoria,
       price: product.preco ?? null,
-      discountPercent: product.discountPercent ?? null
+      discountPercent: product.discountPercent ?? null,
+      supplierUrl: product.sourcing?.supplierUrl ?? '',
+      itemCost: product.sourcing?.itemCost ?? null,
+      shippingCost: product.sourcing?.shippingCost ?? null
     };
     this.photos = product.fotos.map(url => ({ url }));
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  validSupplierUrl(value: string): boolean {
+    if (value.length > 2048 || !/^https?:\/\//i.test(value) || /[\s\\]/.test(value)) return false;
+    try {
+      const url = new URL(value);
+      return Boolean(url.hostname) && !url.username && !url.password;
+    } catch {
+      return false;
+    }
+  }
+
+  get pricingSummary() {
+    const { price, discountPercent, itemCost, shippingCost } = this.form;
+    if (itemCost === null || shippingCost === null || itemCost < 0 || shippingCost < 0) return null;
+    const cost = Math.round(itemCost * 100) + Math.round(shippingCost * 100);
+    if (price === null || price <= 0) return { cost, maximumDiscount: null, profit: null };
+
+    let maximumDiscount = 100;
+    while (maximumDiscount >= 0 && this.productService.salePriceInPence(price, maximumDiscount) < cost) {
+      maximumDiscount--;
+    }
+    const discount = discountPercent !== null && Number.isInteger(discountPercent)
+      && discountPercent >= 1 && discountPercent <= 100 ? discountPercent : 0;
+    return { cost, maximumDiscount, profit: this.productService.salePriceInPence(price, discount) - cost };
   }
 
   async save(): Promise<void> {
@@ -371,7 +399,13 @@ export class AdminPage implements OnInit, OnDestroy {
         throw new Error('Enter the product name and brand.');
       }
 
-      const { price, discountPercent } = this.form;
+      const { price, discountPercent, supplierUrl, itemCost, shippingCost } = this.form;
+      const link = supplierUrl.trim();
+      if (link && !this.validSupplierUrl(link)) throw new Error('Enter a valid HTTP or HTTPS supplier link.');
+      if ([itemCost, shippingCost].some(cost => cost !== null &&
+        (!Number.isFinite(cost) || cost < 0 || cost > 10_000_000 || Number(cost.toFixed(2)) !== cost))) {
+        throw new Error('Enter non-negative costs in GBP with up to two decimal places.');
+      }
       if (discountPercent !== null && (!Number.isInteger(discountPercent) || discountPercent < 1 || discountPercent > 100 || price === null || price <= 0)) {
         throw new Error('Set a price above £0 and enter a whole discount from 1 to 100.');
       }
@@ -389,7 +423,7 @@ export class AdminPage implements OnInit, OnDestroy {
         });
       }
 
-      const product: Omit<Product, 'pagina'> = {
+      const product: Omit<AdminProduct, 'pagina'> = {
         id: this.editingId,
         nome: this.form.name.trim(),
         marca: this.form.brand.trim(),
@@ -397,6 +431,11 @@ export class AdminPage implements OnInit, OnDestroy {
         status: this.form.status.trim(),
         preco: price ?? undefined,
         discountPercent: discountPercent ?? undefined,
+        sourcing: {
+          supplierUrl: link || undefined,
+          itemCost: itemCost ?? undefined,
+          shippingCost: shippingCost ?? undefined
+        },
         fotos: this.photos.map(photo => photo.url)
       };
       this.products = await this.productService.saveProduct(product, Boolean(this.editingId));
@@ -432,7 +471,7 @@ export class AdminPage implements OnInit, OnDestroy {
 
   private async loadProducts(): Promise<void> {
     try {
-      this.products = await this.productService.getProducts();
+      this.products = await this.productService.getAdminProducts();
       this.loadError = '';
     } catch (error) {
       this.loadError = error instanceof Error ? error.message : 'Could not load the product catalogue.';
@@ -474,7 +513,11 @@ export class AdminPage implements OnInit, OnDestroy {
   }
 
   private emptyForm() {
-    return { name: '', brand: '', status: 'GALLERY PREVIEW', category: 'Shoes', price: null as number | null, discountPercent: null as number | null };
+    return {
+      name: '', brand: '', status: 'GALLERY PREVIEW', category: 'Shoes',
+      price: null as number | null, discountPercent: null as number | null,
+      supplierUrl: '', itemCost: null as number | null, shippingCost: null as number | null
+    };
   }
 
   private isSupportedImage(file: File): boolean {
