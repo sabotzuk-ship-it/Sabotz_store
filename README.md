@@ -23,7 +23,7 @@ Requisitos: Node.js 22.22.3 ou mais recente e npm.
 
 4. Abra <http://localhost:4200> para visitar a loja. Para gerenciar o catálogo e consultar **Visitor activity**, acesse <http://localhost:4200/admin> e entre com as credenciais do ADMIN.
 
-Encerre com `Ctrl+C`. Os produtos são gravados em `frontend/public/data/products.json`. O preço é informado em libras esterlinas (GBP, £). No painel, escolha imagens JPG, PNG, WebP ou GIF de até 5 MB; elas são pré-visualizadas e enviadas ao servidor ao salvar. As imagens ficam em `frontend/public/assets/images/uploads/`.
+Encerre com `Ctrl+C`. O Express usa `frontend/public/data/products.json` como catálogo inicial e grava as edições locais em `frontend/data/admin-products.json`, fora da pasta pública. Os preços e custos são em libras esterlinas (GBP, £). No painel, escolha imagens JPG, PNG, WebP ou GIF de até 5 MB. As imagens ficam em `frontend/public/assets/images/uploads/`.
 
 ## Testar no telefone
 
