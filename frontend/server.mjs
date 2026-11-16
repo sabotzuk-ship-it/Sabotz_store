@@ -283,7 +283,7 @@ app.get('/api/admin/orders', requireAdmin, async (_req, res, next) => {
   }
 });
 
-app.put('/api/admin/site-settings', requireAdmin, async (req, res, next) => {
+app.put('/api/admin/site-settings', requireAdmin, serializeProductWrite(async (req, res, next) => {
   try {
     const categories = req.body?.categories;
     if (!Array.isArray(categories) || categories.length > 12) {
@@ -315,6 +315,12 @@ app.put('/api/admin/site-settings', requireAdmin, async (req, res, next) => {
       return res.status(409).json({ error: 'Move or remove the products from a category before deleting it.' });
     }
     const previousSettings = await readSiteSettings();
+    const selection = req.body.selectedProductIds;
+    const productIds = new Set(products.map(product => product.id));
+    if (selection !== undefined && (!Array.isArray(selection) || selection.length > 3 ||
+        new Set(selection).size !== selection.length || selection.some(id => !productIds.has(id)))) {
+      return res.status(400).json({ error: 'Choose up to three distinct products from the catalogue.' });
+    }
     const settings = { categories: categories.map(category => ({
       id: category.id,
       name: category.name.trim(),
@@ -322,7 +328,7 @@ app.put('/api/admin/site-settings', requireAdmin, async (req, res, next) => {
       subtitle: category.subtitle.trim(),
       image: category.image,
       comingSoon: category.comingSoon
-    })) };
+    })), selectedProductIds: selection ?? previousSettings.selectedProductIds };
     await writeSiteSettings(settings);
     await cleanupUnusedUploadedPhotos(previousSettings.categories.map(category => category.image), products);
     res.set('Cache-Control', 'no-store');
@@ -330,7 +336,7 @@ app.put('/api/admin/site-settings', requireAdmin, async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-});
+}));
 
 app.post('/api/admin/uploads', requireAdmin, (req, res, next) => {
   imageUpload.array('images', 20)(req, res, async error => {
